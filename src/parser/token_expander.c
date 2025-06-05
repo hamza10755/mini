@@ -6,7 +6,7 @@
 /*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/15 18:03:41 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/05/17 23:22:21 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/05 17:15:04 by hamzabillah      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -270,7 +270,6 @@ char *expand_string(const char *input, char **env, int *exit_status)
         }
         else if (input[i] == '$')
         {
-            printf("DEBUG: Found $ in expand_string\n");
             if (expand_var(input, &i, &result, &pos, &cap, env, exit_status) == -1)
             {
                 free(result);
@@ -302,15 +301,12 @@ void expand_tokens(t_token *tokens, char **env, int *exit_status)
         next = current->next;
         if (current->type == TOKEN_WORD)
         {
-            printf("DEBUG: Expanding token: %s (is_command: %d)\n", current->value, is_command);
             expanded = expand_string(current->value, env, exit_status);
             if (expanded)
             {
-                printf("DEBUG: Expanded to: %s\n", expanded);
                 if (is_command)
                 {
                     // For commands, keep the expanded value as is
-                    printf("DEBUG: Keeping command as is\n");
                     free(current->value);
                     current->value = ft_strdup(expanded);
                     free(expanded);
@@ -318,7 +314,6 @@ void expand_tokens(t_token *tokens, char **env, int *exit_status)
                 else if (ft_strchr(expanded, ' ') != NULL)
                 {
                     // Split arguments only if not a command
-                    printf("DEBUG: Splitting arguments\n");
                     split_tokens = ft_split(expanded, ' ');
                     if (split_tokens)
                     {
@@ -356,7 +351,6 @@ void expand_tokens(t_token *tokens, char **env, int *exit_status)
                 else
                 {
                     // For single arguments, keep the expanded value as is
-                    printf("DEBUG: Keeping single argument as is\n");
                     free(current->value);
                     current->value = ft_strdup(expanded);
                     free(expanded);
@@ -364,7 +358,7 @@ void expand_tokens(t_token *tokens, char **env, int *exit_status)
             }
         }
         current = next;
-        is_command = 0;  // After first token, everything is an argument
+        is_command = 0;
     }
 }
 

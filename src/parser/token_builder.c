@@ -6,7 +6,7 @@
 /*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/15 18:05:41 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/05/17 22:33:25 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/05 17:14:40 by hamzabillah      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,13 @@ int	handle_double_operator(const char *input, int *i, char *buf, size_t *j,
 int	handle_single_operator(const char *input, int *i, char *buf, size_t *j,
 		int type)
 {
+	char	op[2];
+
+	op[0] = input[*i];
+	op[1] = '\0';
 	append_char(buf, j, input[*i]);
 	(*i)++;
+	flush_buffer(buf, j, NULL);
+	add_token(NULL, op, type);
 	return (type);
 }

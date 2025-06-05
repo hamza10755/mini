@@ -6,7 +6,7 @@
 /*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 19:37:40 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/05/18 00:03:41 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/05 16:38:23 by hamzabillah      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -126,14 +126,14 @@ char	**init_env(char **envp);
 void	cleanup_env(char **env);
 
 // Builtin functions
-int	builtin_echo(char **args);
+int	builtin_echo(char **args, int fd_out);
 int	builtin_cd(char **args, char **env);
-int	builtin_pwd(void);
-int	builtin_export(char **args, char ***env);
+int	builtin_pwd(int fd_out);
+int	builtin_export(char **args, char ***env, int fd_out);
 int	builtin_unset(char **args, char ***env);
-int	builtin_env(char **env);
+int	builtin_env(char **env, int fd_out);
 int	builtin_exit(char **args);
-int	handle_builtin(char **args, char ***env, int *exit_status);
+int	handle_builtin(char **args, char ***env, int *exit_status, int fd_out);
 int	execute_builtin(t_token *tokens, char **env, int *exit_status);
 
 int					execute_command(t_token *tokens, char **env,

@@ -6,7 +6,7 @@
 /*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/11 05:00:00 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/05/17 23:47:04 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/05 17:12:57 by hamzabillah      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,17 +34,24 @@ char	*resolve_command_path(char *command, char **env)
 
 	if (!command)
 		return (NULL);
+
 	if (ft_strchr(command, '/'))
 	{
 		if (access(command, X_OK) == 0)
 			return (ft_strdup(command));
 		return (NULL);
 	}
+
 	path = get_env_value_from_array("PATH", env);
 	if (!path)
 		return (NULL);
+
 	cmd_path = search_in_path(command, path);
 	free(path);
+
+	if (!cmd_path)
+		return (NULL);
+
 	return (cmd_path);
 }
 
@@ -56,9 +63,13 @@ char	*search_in_path(char *command, char *path)
 	char	*path_ptr;
 	char	*temp;
 
+	if (!command || !path)
+		return (NULL);
+
 	path_copy = ft_strdup(path);
 	if (!path_copy)
 		return (NULL);
+
 	path_ptr = path_copy;
 	while ((dir = ft_strtok(path_ptr, ":")))
 	{
@@ -93,28 +104,30 @@ char	**convert_tokens_to_args(t_token *tokens)
 	int		count;
 	int		i;
 	t_token	*current;
+	t_token	*prev = NULL;
 
-	// Count number of arguments
 	count = 0;
 	current = tokens;
 	while (current && current->type != TOKEN_PIPE && current->type != TOKEN_SEMICOLON)
 	{
-		if (current->type == TOKEN_WORD)
+		if (current->type == TOKEN_WORD &&
+			!(prev && (prev->type == TOKEN_REDIR || prev->type == TOKEN_APPEND || prev->type == TOKEN_HEREDOC)))
 			count++;
+		prev = current;
 		current = current->next;
 	}
 
-	// Allocate array for arguments
 	args = malloc((count + 1) * sizeof(char *));
 	if (!args)
 		return (NULL);
 
-	// Copy arguments
 	i = 0;
 	current = tokens;
-	while (i < count)
+	prev = NULL;
+	while (current && i < count)
 	{
-		if (current->type == TOKEN_WORD)
+		if (current->type == TOKEN_WORD &&
+			!(prev && (prev->type == TOKEN_REDIR || prev->type == TOKEN_APPEND || prev->type == TOKEN_HEREDOC)))
 		{
 			args[i] = ft_strdup(current->value);
 			if (!args[i])
@@ -124,6 +137,7 @@ char	**convert_tokens_to_args(t_token *tokens)
 			}
 			i++;
 		}
+		prev = current;
 		current = current->next;
 	}
 	args[count] = NULL;

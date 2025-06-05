@@ -6,7 +6,7 @@
 /*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/15 18:14:32 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/05/18 00:02:45 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/05 17:16:07 by hamzabillah      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,9 +18,9 @@ int main(void)
     t_token     *tokens;
     extern char **environ;
     char        **env;
-    int         exit_status = 0;
-
-    // Initialize our own copy of the environment
+    int         exit_status;
+    
+    exit_status = 0;
     env = init_env(environ);
     if (!env)
         return (1);
@@ -44,13 +44,8 @@ int main(void)
             tokens = tokenize(input, env);
             if (tokens)
             {
-                // Expand tokens
                 expand_tokens(tokens, env, &exit_status);
-
-                // Execute command
                 execute_command(tokens, env, &exit_status);
-
-                // Clean up
                 free_tokens(tokens);
             }
         }

@@ -6,7 +6,7 @@
 /*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/15 18:05:41 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/05/17 22:36:34 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/05 16:29:55 by hamzabillah      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,6 @@ int	handle_operator(const char *input, int *i, char *buffer, size_t *j,
 {
 	char	current;
 	char	next;
-	int		type;
 
 	current = input[*i];
 	next = input[*i + 1];
@@ -31,16 +30,33 @@ int	handle_operator(const char *input, int *i, char *buffer, size_t *j,
 		return (TOKEN_PIPE);
 	}
 	else if (current == '<' && next == '<')
-		type = handle_double_operator(input, i, buffer, j, TOKEN_HEREDOC);
+	{
+		(*i) += 2;
+		add_token(tokens, "<<", TOKEN_HEREDOC);
+		return (TOKEN_HEREDOC);
+	}
 	else if (current == '>' && next == '>')
-		type = handle_double_operator(input, i, buffer, j, TOKEN_APPEND);
+	{
+		(*i) += 2;
+		add_token(tokens, ">>", TOKEN_APPEND);
+		return (TOKEN_APPEND);
+	}
 	else if (current == ';')
-		type = handle_single_operator(input, i, buffer, j, TOKEN_SEMICOLON);
-	else
-		type = handle_single_operator(input, i, buffer, j, TOKEN_REDIR);
-
-	flush_buffer(buffer, j, tokens);
-	return (type);
+	{
+		(*i)++;
+		add_token(tokens, ";", TOKEN_SEMICOLON);
+		return (TOKEN_SEMICOLON);
+	}
+	else if (current == '>' || current == '<')
+	{
+		char op[2];
+		op[0] = current;
+		op[1] = '\0';
+		(*i)++;
+		add_token(tokens, op, TOKEN_REDIR);
+		return (TOKEN_REDIR);
+	}
+	return (0);
 }
 
 int	process_quote_content(const char *input, int *i, char *buffer, size_t *j,

@@ -12,15 +12,18 @@
 
 #include "../../includes/minishell.h"
 
-int	builtin_pwd(void)
+int	builtin_pwd(int fd_out)
 {
-	char	cwd[PATH_MAX];
+	char	*cwd;
 
-	if (getcwd(cwd, sizeof(cwd)) == NULL)
+	cwd = getcwd(NULL, 0);
+	if (!cwd)
 	{
-		ft_putstr_fd("minishell: pwd: error getting current directory\n", 2);
+		perror("getcwd");
 		return (1);
 	}
-	ft_putendl_fd(cwd, 1);
+	ft_putstr_fd(cwd, fd_out);
+	ft_putchar_fd('\n', fd_out);
+	free(cwd);
 	return (0);
 }

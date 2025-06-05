@@ -6,12 +6,11 @@
 /*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/17 22:13:20 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/05/17 23:28:02 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/05 17:13:29 by hamzabillah      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/minishell.h"
-#include <stdio.h>
 
 int	count_pipes(t_token *tokens)
 {
@@ -29,128 +28,119 @@ int	count_pipes(t_token *tokens)
 	return (count);
 }
 
-void	setup_pipe_ends(int pipe_fd[2], int prev_pipe_read, int is_last_cmd)
+static void	execute_child_command(t_token *cmd_start, char **env)
 {
-	if (prev_pipe_read != STDIN_FILENO)
-	{
-		if (dup2(prev_pipe_read, STDIN_FILENO) == -1)
-		{
-			perror("dup2");
-			exit(1);
-		}
-		close(prev_pipe_read);
-	}
-
-	if (!is_last_cmd)
-	{
-		if (dup2(pipe_fd[1], STDOUT_FILENO) == -1)
-		{
-			perror("dup2");
-			exit(1);
-		}
-		close(pipe_fd[0]);
-		close(pipe_fd[1]);
-	}
-}
-
-int	execute_pipe(t_token *tokens, char **env, int *exit_status)
-{
-	int		pipefd[2];
-	pid_t	pid;
 	char	**args;
 	char	*cmd_path;
-	int		status;
 
-	if (pipe(pipefd) == -1)
-		return (1);
-	pid = fork();
-	if (pid == -1)
-	{
-		close(pipefd[0]);
-		close(pipefd[1]);
-		return (1);
-	}
-	if (pid == 0)
-	{
-		close(pipefd[0]);
-		if (dup2(pipefd[1], STDOUT_FILENO) == -1)
-		{
-			close(pipefd[1]);
-			exit(1);
-		}
-		close(pipefd[1]);
-		args = convert_tokens_to_args(tokens);
-		if (!args)
-			exit(1);
-		cmd_path = resolve_command_path(args[0], env);
-		if (!cmd_path)
-		{
-			free_env_array(args);
-			exit(1);
-		}
-		execve(cmd_path, args, env);
-		free(cmd_path);
-		free_env_array(args);
+	args = convert_tokens_to_args(cmd_start);
+	if (!args)
 		exit(1);
+
+	cmd_path = resolve_command_path(args[0], env);
+	if (!cmd_path)
+	{
+		ft_putstr_fd("minishell: ", 2);
+		ft_putstr_fd(args[0], 2);
+		ft_putstr_fd(": command not found\n", 2);
+		free_env_array(args);
+		exit(127);
 	}
-	close(pipefd[1]);
-	waitpid(pid, &status, 0);
-	if (WIFEXITED(status))
-		*exit_status = WEXITSTATUS(status);
-	return (0);
+
+	execve(cmd_path, args, env);
+	free(cmd_path);
+	free_env_array(args);
+	exit(1);
 }
 
 int	execute_pipeline(t_token *tokens, char **env, int *exit_status)
 {
+	int		pipefd[2];
+	int		prev_pipe_read;
+	pid_t	pid;
 	t_token	*current;
-	char	**args;
-	char	*cmd_path;
+	t_token	*cmd_start;
 	int		status;
 
+	prev_pipe_read = STDIN_FILENO;
 	current = tokens;
+	cmd_start = tokens;
+
 	while (current)
 	{
-		if (current->type == TOKEN_PIPE)
+		if (current->type == TOKEN_PIPE || !current->next)
 		{
-			if (execute_pipe(current->next, env, exit_status) != 0)
-				return (1);
-			current = current->next;
-			while (current && current->type != TOKEN_PIPE)
-				current = current->next;
-		}
-		else
-		{
-			args = convert_tokens_to_args(current);
-			if (!args)
-				return (1);
-			cmd_path = resolve_command_path(args[0], env);
-			if (!cmd_path)
+			if (current->type == TOKEN_PIPE)
+				current->value = NULL;
+
+			if (current->type == TOKEN_PIPE)
 			{
-				free_env_array(args);
-				return (1);
+				if (pipe(pipefd) == -1)
+				{
+					if (prev_pipe_read != STDIN_FILENO)
+						close(prev_pipe_read);
+					return (1);
+				}
 			}
-			pid_t pid = fork();
+
+			pid = fork();
 			if (pid == -1)
 			{
-				free(cmd_path);
-				free_env_array(args);
+				if (current->type == TOKEN_PIPE)
+				{
+					close(pipefd[0]);
+					close(pipefd[1]);
+				}
+				if (prev_pipe_read != STDIN_FILENO)
+					close(prev_pipe_read);
 				return (1);
 			}
+
 			if (pid == 0)
 			{
-				execve(cmd_path, args, env);
-				free(cmd_path);
-				free_env_array(args);
-				exit(1);
+				if (prev_pipe_read != STDIN_FILENO)
+				{
+					if (dup2(prev_pipe_read, STDIN_FILENO) == -1)
+					{
+						perror("dup2 input");
+						exit(1);
+					}
+					close(prev_pipe_read);
+				}
+				if (current->type == TOKEN_PIPE)
+				{
+					if (dup2(pipefd[1], STDOUT_FILENO) == -1)
+					{
+						perror("dup2 output");
+						exit(1);
+					}
+					close(pipefd[0]);
+					close(pipefd[1]);
+				}
+
+				execute_child_command(cmd_start, env);
 			}
-			waitpid(pid, &status, 0);
-			if (WIFEXITED(status))
-				*exit_status = WEXITSTATUS(status);
-			free(cmd_path);
-			free_env_array(args);
-			current = current->next;
+			if (prev_pipe_read != STDIN_FILENO)
+				close(prev_pipe_read);
+
+			if (current->type == TOKEN_PIPE)
+			{
+				close(pipefd[1]);
+				prev_pipe_read = pipefd[0];
+				cmd_start = current->next;
+			}
 		}
+		current = current->next;
 	}
+	while (waitpid(-1, &status, 0) > 0)
+	{
+		if (WIFEXITED(status))
+			*exit_status = WEXITSTATUS(status);
+	}
+
+	if (prev_pipe_read != STDIN_FILENO)
+		close(prev_pipe_read);
+
 	return (0);
 }
 

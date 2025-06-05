@@ -14,12 +14,12 @@ SRCS = main.c \
        parser/token_main.c \
        parser/token_debug.c \
        execution/executor.c \
-       execution/builtin_handler.c \
        execution/redirections.c \
        execution/path_env.c \
        execution/signal_handler.c \
        execution/exit_status.c \
        execution/pipe_handler.c \
+       builtins/builtin_handler.c \
        builtins/cd.c \
        builtins/echo.c \
        builtins/env.c \

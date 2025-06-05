@@ -6,7 +6,7 @@
 /*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/21 23:30:00 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/05/18 00:04:56 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/05 16:36:56 by hamzabillah      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,77 +26,94 @@ static int	is_valid_var_name(const char *name)
 	return (1);
 }
 
-static void	print_export(char **env)
+static int	is_valid_env_var(const char *var)
 {
-	int	i;
+	const char	*equal_sign;
+	char		*name;
 
-	i = 0;
-	while (env[i])
+	if (!var || !*var)
+		return (0);
+	equal_sign = ft_strchr(var, '=');
+	if (!equal_sign)
+		return (is_valid_var_name(var));
+	name = ft_substr(var, 0, equal_sign - var);
+	if (!name)
+		return (0);
+	if (!is_valid_var_name(name))
 	{
-		ft_putstr_fd("declare -x ", STDOUT_FILENO);
-		ft_putendl_fd(env[i], STDOUT_FILENO);
-		i++;
+		free(name);
+		return (0);
 	}
+	free(name);
+	return (1);
 }
 
-int	builtin_export(char **args, char ***env)
+int	builtin_export(char **args, char ***env, int fd_out)
 {
 	int		i;
-	int		error;
+	int		status;
+	char	**sorted_env;
 	char	*equal_sign;
 	char	*name;
 	char	*value;
-	char	**new_env;
 
+	status = 0;
 	if (!args[1])
 	{
-		print_export(*env);
+		sorted_env = copy_env(*env);
+		if (!sorted_env)
+			return (1);
+		sort_env_vars(sorted_env);
+		i = 0;
+		while (sorted_env[i])
+		{
+			ft_putstr_fd("declare -x ", fd_out);
+			ft_putendl_fd(sorted_env[i], fd_out);
+			i++;
+		}
+		free_env_array(sorted_env);
 		return (0);
 	}
-	error = 0;
 	i = 1;
 	while (args[i])
 	{
-		equal_sign = ft_strchr(args[i], '=');
-		if (!equal_sign)
+		if (!is_valid_env_var(args[i]))
 		{
-			if (!is_valid_var_name(args[i]))
-			{
-				ft_putstr_fd("minishell: export: `", STDERR_FILENO);
-				ft_putstr_fd(args[i], STDERR_FILENO);
-				ft_putendl_fd("': not a valid identifier", STDERR_FILENO);
-				error = 1;
-			}
-			i++;
-			continue;
-		}
-		name = ft_substr(args[i], 0, equal_sign - args[i]);
-		if (!name)
-			return (1);
-		value = ft_strdup(equal_sign + 1);
-		if (!value)
-		{
-			free(name);
-			return (1);
-		}
-		if (!is_valid_var_name(name))
-		{
-			ft_putstr_fd("minishell: export: `", STDERR_FILENO);
-			ft_putstr_fd(name, STDERR_FILENO);
-			ft_putendl_fd("': not a valid identifier", STDERR_FILENO);
-			error = 1;
+			ft_putstr_fd("minishell: export: `", 2);
+			ft_putstr_fd(args[i], 2);
+			ft_putstr_fd("': not a valid identifier\n", 2);
+			status = 1;
 		}
 		else
 		{
-			new_env = update_env_var(*env, name, value);
-			if (new_env)
+			equal_sign = ft_strchr(args[i], '=');
+			if (!equal_sign)
 			{
-				*env = new_env;
+				if (add_env_var(*env, args[i], "") == NULL)
+					return (1);
+			}
+			else
+			{
+				name = ft_substr(args[i], 0, equal_sign - args[i]);
+				if (!name)
+					return (1);
+				value = ft_strdup(equal_sign + 1);
+				if (!value)
+				{
+					free(name);
+					return (1);
+				}
+				if (add_env_var(*env, name, value) == NULL)
+				{
+					free(name);
+					free(value);
+					return (1);
+				}
+				free(name);
+				free(value);
 			}
 		}
-		free(name);
-		free(value);
 		i++;
 	}
-	return (error);
+	return (status);
 }

@@ -6,13 +6,12 @@
 /*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/17 21:50:00 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/05/17 23:47:16 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/05 17:10:08 by hamzabillah      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/minishell.h"
 
-// Initialize environment from envp
 t_env	*init_env(char **envp)
 {
 	t_env	*env;
@@ -43,7 +42,6 @@ t_env	*init_env(char **envp)
 	return (env);
 }
 
-// Free environment list
 void	free_env(t_env *env)
 {
 	t_env	*current;
@@ -59,7 +57,6 @@ void	free_env(t_env *env)
 	}
 }
 
-// Convert environment list to array
 char	**convert_env_to_array(t_env *env)
 {
 	char	**env_array;
@@ -96,7 +93,6 @@ char	**convert_env_to_array(t_env *env)
 	return (env_array);
 }
 
-// Get environment value by name
 char	*get_env_value(const char *name, t_env *env)
 {
 	t_env	*current;
@@ -114,7 +110,6 @@ char	*get_env_value(const char *name, t_env *env)
 	return (NULL);
 }
 
-// Set environment value
 int	set_env_value(const char *name, const char *value, t_env **env)
 {
 	t_env	*current;
@@ -155,7 +150,6 @@ int	set_env_value(const char *name, const char *value, t_env **env)
 	return (0);
 }
 
-// Unset environment value
 void	unset_env_value(const char *name, t_env **env)
 {
 	t_env	*current;

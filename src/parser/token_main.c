@@ -6,7 +6,7 @@
 /*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/15 18:06:52 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/05/17 23:24:00 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/05 17:15:15 by hamzabillah      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,11 +24,9 @@ void	handle_word(const char *input, int *i, char *buffer, size_t *j,
 	{
 		printf("DEBUG: Found $ in handle_word\n");
 		start = *i;
-		(*i)++;  // Skip the $
+		(*i)++;
 		while (input[*i] && (ft_isalnum(input[*i]) || input[*i] == '_'))
-			(*i)++;
-		
-		// Extract variable name
+			(*i)++;		
 		char *var_name = ft_substr(input, start + 1, *i - start - 1);
 		if (var_name)
 		{
@@ -52,7 +50,6 @@ void	handle_word(const char *input, int *i, char *buffer, size_t *j,
 	else if (input[*i] == '~')
 	{
 		start = *i;
-		// For tilde expansion, we'll just expand to HOME
 		expanded = get_env_value_from_array("HOME", env);
 		if (expanded)
 		{
