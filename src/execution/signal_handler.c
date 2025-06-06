@@ -6,12 +6,11 @@
 /*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/17 22:03:00 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/05 17:14:28 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/06 21:52:49 by hamzabillah      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/minishell.h"
-
 
 static int	g_signal_status = 0;
 

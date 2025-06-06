@@ -6,7 +6,7 @@
 /*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 19:37:40 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/05 16:38:23 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/06 21:52:41 by hamzabillah      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,45 +122,31 @@ void	sort_env_vars(char **env);
 char	*get_env_value_from_array(const char *name, char **env);
 void	free_env_array(char **env);
 int		count_env_vars(char **env);
-char	**init_env(char **envp);
+char	**init_env(char **environ);
 void	cleanup_env(char **env);
+void	free_env_array(char **env);
+
 
 // Builtin functions
 int	builtin_echo(char **args, int fd_out);
 int	builtin_cd(char **args, char **env);
 int	builtin_pwd(int fd_out);
-int	builtin_export(char **args, char ***env, int fd_out);
-int	builtin_unset(char **args, char ***env);
 int	builtin_env(char **env, int fd_out);
 int	builtin_exit(char **args);
 int	handle_builtin(char **args, char ***env, int *exit_status, int fd_out);
 int	execute_builtin(t_token *tokens, char **env, int *exit_status);
 
-int					execute_command(t_token *tokens, char **env,
-						int *exit_status);
-int					execute_simple_command(t_token *tokens, char **env,
-						int *exit_status);
-int					handle_redirections(t_token *tokens, int *fd_in,
-						int *fd_out);
-int					setup_redirection(t_token *token, int *fd_in, int *fd_out);
-void				restore_redirections(int fd_in, int fd_out);
-
-int					is_builtin(t_token *token);
-int					execute_builtin(t_token *tokens, char **env,
-						int *exit_status);
-
-// execution
-int					execute_command(t_token *tokens, char **env,
-						int *exit_status);
-int					execute_simple_command(t_token *tokens, char **env,
-						int *exit_status);
-int					execute_pipeline(t_token *tokens, char **env, int *exit_status);
+// Execution functions
+int	execute_command(t_token *tokens, char ***env, int *exit_status);
+int	execute_pipeline(t_token *tokens, char ***env, int *exit_status);
+void	execute_child_command(t_token *cmd_start, char **env);
+int	has_pipe(t_token *tokens);
+int	count_pipes(t_token *tokens);
 
 // Redirection handling
-int					handle_redirections(t_token *tokens, int *fd_in,
-						int *fd_out);
-int					setup_redirection(t_token *token, int *fd_in, int *fd_out);
-void				restore_redirections(int fd_in, int fd_out);
+int	handle_redirections(t_token *tokens, int *fd_in, int *fd_out);
+int	setup_redirection(t_token *token, int *fd_in, int *fd_out);
+void	restore_redirections(int fd_in, int fd_out);
 
 // Path resolution
 char				*resolve_command_path(char *command, char **env);
@@ -202,5 +188,23 @@ void	reset_signal_status(void);
 // Exit status handling
 int		get_exit_status(int exit_status);
 void	update_exit_status(int wait_status, int *exit_status);
+void	set_exit_status_env(int exit_status, char ***env);
+
+char    **builtin_export(char **args, char ***env, int fd_out);
+char    **builtin_unset(char **args, char ***env);
+
+void print_sorted_env(char **env, int fd_out);
+
+/* Environment functions */
+char	**init_env(char **environ);
+void	free_env_array(char **env);
+int		is_valid_env_var(const char *str);
+int		is_env_var_match(const char *env_var, const char *var_name);
+int		update_env_var_internal(char **env, const char *var);
+void	print_sorted_env(char **env, int fd_out);
+
+/* Token functions */
+void	free_tokens(t_token *tokens);
+void	print_tokens(t_token *tokens);
 
 #endif

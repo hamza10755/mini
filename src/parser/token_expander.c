@@ -6,7 +6,7 @@
 /*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/15 18:03:41 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/05 17:15:04 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/06 21:58:03 by hamzabillah      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -295,7 +295,7 @@ void expand_tokens(t_token *tokens, char **env, int *exit_status)
     int     is_command;
 
     current = tokens;
-    is_command = 1;  // First token is always a command
+    is_command = 1;
     while (current)
     {
         next = current->next;
@@ -306,14 +306,12 @@ void expand_tokens(t_token *tokens, char **env, int *exit_status)
             {
                 if (is_command)
                 {
-                    // For commands, keep the expanded value as is
                     free(current->value);
                     current->value = ft_strdup(expanded);
                     free(expanded);
                 }
                 else if (ft_strchr(expanded, ' ') != NULL)
                 {
-                    // Split arguments only if not a command
                     split_tokens = ft_split(expanded, ' ');
                     if (split_tokens)
                     {
@@ -350,7 +348,6 @@ void expand_tokens(t_token *tokens, char **env, int *exit_status)
                 }
                 else
                 {
-                    // For single arguments, keep the expanded value as is
                     free(current->value);
                     current->value = ft_strdup(expanded);
                     free(expanded);

@@ -6,7 +6,7 @@
 /*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/21 23:30:00 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/05 16:35:29 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/06 21:17:56 by hamzabillah      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,8 +21,11 @@ int	builtin_env(char **env, int fd_out)
 	i = 0;
 	while (env[i])
 	{
-		ft_putstr_fd(env[i], fd_out);
-		ft_putchar_fd('\n', fd_out);
+		if (ft_strchr(env[i], '='))
+		{
+			ft_putstr_fd(env[i], fd_out);
+			ft_putchar_fd('\n', fd_out);
+		}
 		i++;
 	}
 	return (0);

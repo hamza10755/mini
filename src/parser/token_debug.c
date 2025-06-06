@@ -6,7 +6,7 @@
 /*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/15 18:08:18 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/03/15 21:42:46 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/06 21:05:52 by hamzabillah      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,25 +29,8 @@ void	print_tokens(t_token *tokens)
 	current = tokens;
 	while (current)
 	{
-		printf("Token: '%s' (Type: ", current->value);
-		get_token_type_name(current->type);
-		printf(")\n");
+		printf("Token: %s, Type: %d\n", current->value, current->type);
 		current = current->next;
-	}
-}
-
-void	free_tokens(t_token *tokens)
-{
-	t_token	*current;
-	t_token	*next;
-
-	current = tokens;
-	while (current)
-	{
-		next = current->next;
-		free(current->value);
-		free(current);
-		current = next;
 	}
 }
 

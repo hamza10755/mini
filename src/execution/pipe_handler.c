@@ -6,7 +6,7 @@
 /*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/17 22:13:20 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/05 17:13:29 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/06 21:57:26 by hamzabillah      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,11 +28,12 @@ int	count_pipes(t_token *tokens)
 	return (count);
 }
 
-static void	execute_child_command(t_token *cmd_start, char **env)
+void	execute_child_command(t_token *cmd_start, char **env)
 {
 	char	**args;
 	char	*cmd_path;
 
+	reset_signals();
 	args = convert_tokens_to_args(cmd_start);
 	if (!args)
 		exit(1);
@@ -53,7 +54,7 @@ static void	execute_child_command(t_token *cmd_start, char **env)
 	exit(1);
 }
 
-int	execute_pipeline(t_token *tokens, char **env, int *exit_status)
+int	execute_pipeline(t_token *tokens, char ***env, int *exit_status)
 {
 	int		pipefd[2];
 	int		prev_pipe_read;
@@ -83,6 +84,7 @@ int	execute_pipeline(t_token *tokens, char **env, int *exit_status)
 				}
 			}
 
+			signal(SIGINT, SIG_IGN);
 			pid = fork();
 			if (pid == -1)
 			{
@@ -118,7 +120,7 @@ int	execute_pipeline(t_token *tokens, char **env, int *exit_status)
 					close(pipefd[1]);
 				}
 
-				execute_child_command(cmd_start, env);
+				execute_child_command(cmd_start, *env);
 			}
 			if (prev_pipe_read != STDIN_FILENO)
 				close(prev_pipe_read);
@@ -132,10 +134,18 @@ int	execute_pipeline(t_token *tokens, char **env, int *exit_status)
 		}
 		current = current->next;
 	}
+	init_signals();
 	while (waitpid(-1, &status, 0) > 0)
 	{
 		if (WIFEXITED(status))
 			*exit_status = WEXITSTATUS(status);
+		else if (WIFSIGNALED(status))
+		{
+			if (WTERMSIG(status) == SIGINT)
+				*exit_status = 130;
+			else if (WTERMSIG(status) == SIGQUIT)
+				*exit_status = 131;
+		}
 	}
 
 	if (prev_pipe_read != STDIN_FILENO)

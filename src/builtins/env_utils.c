@@ -6,7 +6,7 @@
 /*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/21 23:30:00 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/05 17:09:11 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/06 21:51:05 by hamzabillah      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,9 @@ char	*get_env_value_from_array(const char *name, char **env)
 int	count_env_vars(char **env)
 {
 	int	count;
+
+	if (!env || !env[0])
+		return (0);
 
 	count = 0;
 	while (env[count])
@@ -61,10 +64,17 @@ char	**copy_env(char **env)
 	int		count;
 	int		i;
 
+	if (!env || !env[0])
+		return (NULL);
+
 	count = count_env_vars(env);
-	new_env = malloc(sizeof(char *) * (count + 1));
+	if (count == 0)
+		return (NULL);
+
+	new_env = (char **)malloc(sizeof(char *) * (count + 1));
 	if (!new_env)
 		return (NULL);
+
 	i = 0;
 	while (env[i])
 	{
@@ -127,10 +137,12 @@ char	**update_env_var(char **env, const char *name, const char *value)
 	char	*new_var;
 	int		i;
 	int		len;
+	int		count;
 
 	if (!env || !name || !value)
 		return (NULL);
 	len = ft_strlen(name);
+	count = count_env_vars(env);
 	i = 0;
 	while (env[i])
 	{
@@ -139,7 +151,7 @@ char	**update_env_var(char **env, const char *name, const char *value)
 			new_var = ft_strjoin(name, "=");
 			if (!new_var)
 				return (NULL);
-			new_env = malloc(sizeof(char *) * (i + 2));
+			new_env = malloc(sizeof(char *) * (count + 1));
 			if (!new_env)
 			{
 				free(new_var);
@@ -168,7 +180,7 @@ char	**update_env_var(char **env, const char *name, const char *value)
 		}
 		i++;
 	}
-	new_env = malloc(sizeof(char *) * (i + 2));
+	new_env = malloc(sizeof(char *) * (count + 2));
 	if (!new_env)
 		return (NULL);
 	i = 0;
@@ -211,41 +223,38 @@ char	**remove_env_var(char **env, const char *name)
 	int		j;
 	int		name_len;
 	char	**new_env;
+	int		count;
 
-	if (!env)
+	if (!env || !name)
 		return (NULL);
+
 	name_len = ft_strlen(name);
+	count = count_env_vars(env);
+
+	new_env = malloc(sizeof(char *) * count);
+	if (!new_env)
+		return (env);
+
+	j = 0;
 	i = 0;
 	while (env[i])
 	{
-		if (ft_strncmp(env[i], name, name_len) == 0 && env[i][name_len] == '=')
+		if (ft_strncmp(env[i], name, name_len) != 0 || env[i][name_len] != '=')
 		{
-			new_env = malloc(sizeof(char *) * (count_env_vars(env)));
-			if (!new_env)
-				return (env);
-			j = 0;
-			i = 0;
-			while (env[i])
+			new_env[j] = ft_strdup(env[i]);
+			if (!new_env[j])
 			{
-				if (ft_strncmp(env[i], name, name_len) != 0 || env[i][name_len] != '=')
-				{
-					new_env[j] = ft_strdup(env[i]);
-					if (!new_env[j])
-					{
-						free_env_array(new_env);
-						return (env);
-					}
-					j++;
-				}
-				i++;
+				free_env_array(new_env);
+				return (env);
 			}
-			new_env[j] = NULL;
-			free_env_array(env);
-			return (new_env);
+			j++;
 		}
 		i++;
 	}
-	return (env);
+	new_env[j] = NULL;
+
+	free_env_array(env);
+	return (new_env);
 }
 
 void	sort_env_vars(char **env)

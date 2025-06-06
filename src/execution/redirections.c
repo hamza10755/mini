@@ -6,7 +6,7 @@
 /*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/11 05:00:00 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/05 16:31:23 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/06 21:32:33 by hamzabillah      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,39 +41,69 @@ static char	*generate_temp_filename(void)
 	return (filename);
 }
 
+static void	handle_heredoc_sigint(int sig)
+{
+	(void)sig;
+	exit(130);
+}
+
 static char	*read_heredoc_input(const char *delimiter)
 {
 	char	*line;
 	char	*input;
 	char	*temp;
+	pid_t	pid;
+	int		status;
 
 	input = ft_strdup("");
 	if (!input)
 		return (NULL);
-	while (1)
+
+	pid = fork();
+	if (pid == -1)
 	{
-		line = readline("> ");
-		if (!line)
+		free(input);
+		return (NULL);
+	}
+
+	if (pid == 0)
+	{
+		signal(SIGINT, handle_heredoc_sigint);
+		while (1)
 		{
+			line = readline("> ");
+			if (!line)
+			{
+				free(input);
+				exit(0);
+			}
+			if (ft_strncmp(line, delimiter, ft_strlen(delimiter) + 1) == 0)
+			{
+				free(line);
+				break;
+			}
+			temp = ft_strjoin(input, line);
 			free(input);
-			return (NULL);
-		}
-		if (ft_strncmp(line, delimiter, ft_strlen(delimiter) + 1) == 0)
-		{
 			free(line);
-			break ;
+			if (!temp)
+				exit(1);
+			input = temp;
+			temp = ft_strjoin(input, "\n");
+			free(input);
+			if (!temp)
+				exit(1);
+			input = temp;
 		}
-		temp = ft_strjoin(input, line);
+		write(1, input, ft_strlen(input));
 		free(input);
-		free(line);
-		if (!temp)
-			return (NULL);
-		input = temp;
-		temp = ft_strjoin(input, "\n");
+		exit(0);
+	}
+
+	waitpid(pid, &status, 0);
+	if (WIFEXITED(status) && WEXITSTATUS(status) == 130)
+	{
 		free(input);
-		if (!temp)
-			return (NULL);
-		input = temp;
+		return (NULL);
 	}
 	return (input);
 }
@@ -189,10 +219,7 @@ int	setup_redirection(t_token *token, int *fd_in, int *fd_out)
 	else if (token->type == TOKEN_HEREDOC)
 	{
 		if (create_heredoc_file(token->next->value, &new_fd) != 0)
-		{
-			ft_putstr_fd("minishell: heredoc failed\n", STDERR_FILENO);
 			return (1);
-		}
 		if (*fd_in != STDIN_FILENO)
 			close(*fd_in);
 		*fd_in = new_fd;

@@ -6,7 +6,7 @@
 /*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/15 18:04:42 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/04/11 04:46:13 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/06 21:03:04 by hamzabillah      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,3 +62,18 @@ char	*allocate_res_buff(char *str)
 		return (NULL);
 	return (res);
 }
+
+void	free_tokens(t_token *tokens)
+{
+	t_token	*current;
+	t_token	*next;
+
+	current = tokens;
+	while (current)
+	{
+		next = current->next;
+		free(current->value);
+		free(current);
+		current = next;
+	}
+} 
