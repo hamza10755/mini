@@ -6,7 +6,7 @@
 /*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 19:37:40 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/08 21:55:25 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/08 23:18:24 by hamzabillah      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -140,7 +140,7 @@ int	execute_builtin(t_token *tokens, char **env, int *exit_status);
 // Execution functions
 int	execute_command(t_token *tokens, char ***env, int *exit_status);
 int	execute_pipeline(t_token *tokens, char ***env, int *exit_status);
-void	execute_child_command(t_token *cmd_start, char **env);
+void	execute_child_command(t_token *cmd_start, char **env, int is_first_child);
 int	has_pipe(t_token *tokens);
 int	count_pipes(t_token *tokens);
 

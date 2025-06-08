@@ -6,7 +6,7 @@
 /*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/17 22:13:20 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/06 21:57:26 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/08 23:17:44 by hamzabillah      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,22 +28,32 @@ int	count_pipes(t_token *tokens)
 	return (count);
 }
 
-void	execute_child_command(t_token *cmd_start, char **env)
+void	execute_child_command(t_token *cmd_start, char **env, int is_first_child)
 {
 	char	**args;
 	char	*cmd_path;
+	int		exit_status;
 
 	reset_signals();
 	args = convert_tokens_to_args(cmd_start);
 	if (!args)
 		exit(1);
 
+	if (is_builtin(cmd_start))
+	{
+		exit_status = handle_builtin(args, &env, &exit_status, STDOUT_FILENO);
+		free_env_array(args);
+		exit(exit_status);
+	}
+
 	cmd_path = resolve_command_path(args[0], env);
 	if (!cmd_path)
 	{
-		ft_putstr_fd("minishell: ", 2);
-		ft_putstr_fd(args[0], 2);
-		ft_putstr_fd(": command not found\n", 2);
+		if (is_first_child) {
+			ft_putstr_fd("minishell: ", 2);
+			ft_putstr_fd(args[0], 2);
+			ft_putstr_fd(": command not found\n", 2);
+		}
 		free_env_array(args);
 		exit(127);
 	}
@@ -62,10 +72,12 @@ int	execute_pipeline(t_token *tokens, char ***env, int *exit_status)
 	t_token	*current;
 	t_token	*cmd_start;
 	int		status;
+	int		is_first_child;
 
 	prev_pipe_read = STDIN_FILENO;
 	current = tokens;
 	cmd_start = tokens;
+	is_first_child = 1;
 
 	while (current)
 	{
@@ -120,7 +132,7 @@ int	execute_pipeline(t_token *tokens, char ***env, int *exit_status)
 					close(pipefd[1]);
 				}
 
-				execute_child_command(cmd_start, *env);
+				execute_child_command(cmd_start, *env, is_first_child);
 			}
 			if (prev_pipe_read != STDIN_FILENO)
 				close(prev_pipe_read);
@@ -130,6 +142,7 @@ int	execute_pipeline(t_token *tokens, char ***env, int *exit_status)
 				close(pipefd[1]);
 				prev_pipe_read = pipefd[0];
 				cmd_start = current->next;
+				is_first_child = 0;
 			}
 		}
 		current = current->next;

@@ -6,7 +6,7 @@
 /*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/17 22:13:20 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/08 21:33:25 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/08 23:14:09 by hamzabillah      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ int	execute_command_with_path(char *cmd_path, char **args, char **env)
 	return (exit_status);
 }
 
-int	execute_simple_command(t_token *tokens, char ***env, int *exit_status)
+int	execute_simple_command(t_token *tokens, char ***env, int *exit_status, int in_pipeline)
 {
 	t_token	*current;
 	char	*cmd_path;
@@ -89,9 +89,11 @@ int	execute_simple_command(t_token *tokens, char ***env, int *exit_status)
 		cmd_path = resolve_command_path(args[0], *env);
 		if (!cmd_path)
 		{
-			ft_putstr_fd("minishill: ", STDERR_FILENO);
-			ft_putstr_fd(args[0], STDERR_FILENO);
-			ft_putstr_fd(": command not found\n", STDERR_FILENO);
+			if (!in_pipeline) {
+				ft_putstr_fd("minishill: ", STDERR_FILENO);
+				ft_putstr_fd(args[0], STDERR_FILENO);
+				ft_putstr_fd(": command not found\n", STDERR_FILENO);
+			}
 			free(args);
 			dup2(saved_stdin, STDIN_FILENO);
 			dup2(saved_stdout, STDOUT_FILENO);
@@ -135,7 +137,7 @@ int	execute_command(t_token *tokens, char ***env, int *exit_status)
 	}
 	else
 	{
-		result = execute_simple_command(tokens, env, exit_status);
+		result = execute_simple_command(tokens, env, exit_status, 0);
 		return (result);
 	}
 }
