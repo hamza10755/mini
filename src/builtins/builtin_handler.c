@@ -6,7 +6,7 @@
 /*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/21 23:30:00 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/06 21:16:02 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/08 22:17:35 by hamzabillah      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,6 @@ int	execute_builtin(t_token *tokens, char **env, int *exit_status)
 		status = builtin_pwd(fd_out);
 	else if (ft_strncmp(tokens->value, "export", 7) == 0)
 	{
-		printf("DEBUG: execute_builtin - Before builtin_export, env: %p\n", (void *)env);
 		new_env = builtin_export(args, &env, fd_out);
 		if (new_env)
 		{
@@ -62,7 +61,6 @@ int	execute_builtin(t_token *tokens, char **env, int *exit_status)
 			env = NULL;
 			env = new_env;
 		}
-		printf("DEBUG: execute_builtin - After builtin_export, new_env: %p\n", (void *)new_env);
 		status = (new_env != NULL) ? 0 : 1;
 	}
 	else if (ft_strncmp(tokens->value, "unset", 6) == 0)

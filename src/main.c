@@ -6,11 +6,13 @@
 /*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/15 18:14:32 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/06 21:58:34 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/08 22:50:46 by hamzabillah      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
+
+extern int g_signal_flag;
 
 int main(void)
 {
@@ -19,6 +21,7 @@ int main(void)
     extern char **environ;
     char        **env;
     int         exit_status;
+    int         saved_stdin;
     
     exit_status = 0;
     env = init_env(environ);
@@ -27,13 +30,17 @@ int main(void)
 
     tokens = NULL;
     init_signals();
+    saved_stdin = dup(0);
     while (1)
     {
-        fflush(stdout);
         input = readline("minishill$ ");
         if (!input)
         {
-            write(1, "exit\n", 5);
+            if (g_signal_flag == SIGINT) {
+                dup2(saved_stdin, 0);
+                reset_signal_status();
+                continue;
+            }
             break;
         }
         if (*input)
@@ -47,12 +54,26 @@ int main(void)
                 exit(exit_status);
             }
             tokens = tokenize(input, env);
+            if (g_signal_flag == SIGINT) {
+                if (tokens) {
+                    free_tokens(tokens);
+                    tokens = NULL;
+                }
+                if (input) {
+                    free(input);
+                    input = NULL;
+                }
+                dup2(saved_stdin, 0);
+                reset_signal_status();
+                continue;
+            }
             if (tokens)
             {
                 expand_tokens(tokens, env, &exit_status);
                 execute_command(tokens, &env, &exit_status);
                 set_exit_status_env(exit_status, &env);
                 free_tokens(tokens);
+                tokens = NULL;
             }
             else
             {
@@ -60,12 +81,16 @@ int main(void)
                 set_exit_status_env(exit_status, &env);
             }
         }
-        free(input);
+        if (input) {
+            free(input);
+            input = NULL;
+        }
         init_signals();
         reset_signal_status();
     }
-    free_tokens(tokens);
-    free_env_array(env);
-    env = NULL;
+    if (env) {
+        free_env_array(env);
+        env = NULL;
+    }
     return (exit_status);
 }

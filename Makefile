@@ -16,7 +16,7 @@ SRCS = main.c \
        execution/executor.c \
        execution/redirections.c \
        execution/path_env.c \
-       execution/signal_handler.c \
+       execution/signals.c \
        execution/exit_status.c \
        execution/pipe_handler.c \
        builtins/builtin_handler.c \

@@ -6,7 +6,7 @@
 /*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 19:37:40 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/08 20:50:53 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/08 21:55:25 by hamzabillah      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@
 # include <stdio.h>
 # include <stdlib.h>
 # include <string.h>
+# include <signal.h>
 # include <sys/stat.h>
 # include <sys/types.h>
 # include <sys/wait.h>
@@ -182,8 +183,10 @@ void				init_global_env(char **env_array);
 // Signal handling
 void	init_signals(void);
 void	reset_signals(void);
-int		get_signal_status(void);
 void	reset_signal_status(void);
+void 	reset_signals_heredoc(void);
+void 	signals_setup(int mode);
+void 	close_heredoc(int signum);
 
 // Exit status handling
 int		get_exit_status(int exit_status);

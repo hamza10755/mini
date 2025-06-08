@@ -6,7 +6,7 @@
 /*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/17 22:13:20 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/06 21:56:57 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/08 21:33:25 by hamzabillah      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,8 @@ int	execute_simple_command(t_token *tokens, char ***env, int *exit_status)
 	int		fd_in;
 	int		fd_out;
 	int		result;
+	int		saved_stdin;
+	int		saved_stdout;
 
 	current = tokens;
 	if (!current)
@@ -61,8 +63,8 @@ int	execute_simple_command(t_token *tokens, char ***env, int *exit_status)
 	args = convert_tokens_to_args(tokens);
 	if (!args)
 		return (1);
-	fd_in = 0;
-	fd_out = 1;
+	fd_in = STDIN_FILENO;
+	fd_out = STDOUT_FILENO;
 	if (handle_redirections(tokens, &fd_in, &fd_out) != 0)
 	{
 		free(args);
@@ -70,18 +72,12 @@ int	execute_simple_command(t_token *tokens, char ***env, int *exit_status)
 		return (1);
 	}
 
-	int saved_stdin = -1;
-	int saved_stdout = -1;
+	saved_stdin = dup(STDIN_FILENO);
+	saved_stdout = dup(STDOUT_FILENO);
 	if (fd_in != STDIN_FILENO)
-	{
-		saved_stdin = dup(STDIN_FILENO);
 		dup2(fd_in, STDIN_FILENO);
-	}
 	if (fd_out != STDOUT_FILENO)
-	{
-		saved_stdout = dup(STDOUT_FILENO);
 		dup2(fd_out, STDOUT_FILENO);
-	}
 
 	if (is_builtin(current))
 	{
@@ -93,18 +89,14 @@ int	execute_simple_command(t_token *tokens, char ***env, int *exit_status)
 		cmd_path = resolve_command_path(args[0], *env);
 		if (!cmd_path)
 		{
-			fprintf(stderr, "minishill: %s: command not found\n", args[0]);
+			ft_putstr_fd("minishill: ", STDERR_FILENO);
+			ft_putstr_fd(args[0], STDERR_FILENO);
+			ft_putstr_fd(": command not found\n", STDERR_FILENO);
 			free(args);
-			if (saved_stdin != -1)
-			{
-				dup2(saved_stdin, STDIN_FILENO);
-				close(saved_stdin);
-			}
-			if (saved_stdout != -1)
-			{
-				dup2(saved_stdout, STDOUT_FILENO);
-				close(saved_stdout);
-			}
+			dup2(saved_stdin, STDIN_FILENO);
+			dup2(saved_stdout, STDOUT_FILENO);
+			close(saved_stdin);
+			close(saved_stdout);
 			if (fd_in != STDIN_FILENO)
 				close(fd_in);
 			if (fd_out != STDOUT_FILENO)
@@ -116,17 +108,10 @@ int	execute_simple_command(t_token *tokens, char ***env, int *exit_status)
 		free(cmd_path);
 		free(args);
 	}
-
-	if (saved_stdin != -1) 
-	{
-		dup2(saved_stdin, STDIN_FILENO);
-		close(saved_stdin); 
-	}
-	if (saved_stdout != -1)
-	{
-		dup2(saved_stdout, STDOUT_FILENO);
-		close(saved_stdout);
-	}
+	dup2(saved_stdin, STDIN_FILENO);
+	dup2(saved_stdout, STDOUT_FILENO);
+	close(saved_stdin);
+	close(saved_stdout);
 	if (fd_in != STDIN_FILENO)
 		close(fd_in);
 	if (fd_out != STDOUT_FILENO)
