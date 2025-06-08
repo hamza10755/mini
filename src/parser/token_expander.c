@@ -6,7 +6,7 @@
 /*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/15 18:03:41 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/06 21:58:03 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/08 15:40:26 by hamzabillah      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,7 +88,16 @@ int expand_var(const char *input, int *i, char **buffer, size_t *pos, size_t *ca
 	if (input[*i] == '?')
 	{
 		(*i)++;
-		return (handle_special_var("?", buffer, pos, cap, exit_status));
+		value = ft_itoa(*exit_status);
+		if (!value)
+			return (1);
+		if (append_expanded(buffer, pos, cap, value) != 0)
+		{
+			free(value);
+			return (1);
+		}
+		free(value);
+		return (0);
 	}
 	if (ft_isdigit(input[*i]))
 	{
@@ -304,13 +313,7 @@ void expand_tokens(t_token *tokens, char **env, int *exit_status)
             expanded = expand_string(current->value, env, exit_status);
             if (expanded)
             {
-                if (is_command)
-                {
-                    free(current->value);
-                    current->value = ft_strdup(expanded);
-                    free(expanded);
-                }
-                else if (ft_strchr(expanded, ' ') != NULL)
+                if (ft_strchr(expanded, ' ') != NULL && !is_command)
                 {
                     split_tokens = ft_split(expanded, ' ');
                     if (split_tokens)

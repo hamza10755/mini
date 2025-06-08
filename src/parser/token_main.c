@@ -6,67 +6,45 @@
 /*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/15 18:06:52 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/06 21:13:52 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/08 15:42:14 by hamzabillah      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/minishell.h"
 
-static char	*extract_var_name(const char *input)
-{
-	int		i;
-	char	*var_name;
-
-	i = 0;
-	while (input[i] && (ft_isalnum(input[i]) || input[i] == '_'))
-		i++;
-	var_name = ft_substr(input, 0, i);
-	return (var_name);
-}
-
 void	handle_word(const char *input, int *i, char *buffer, size_t *j,
 		int *in_word, char **env)
 {
-	char	*var_name;
-	char	*expanded;
-	char	*temp;
-
 	*in_word = 1;
 	if (input[*i] == '$')
 	{
+		append_char(buffer, j, input[*i]);
 		(*i)++;
-		var_name = extract_var_name(input + *i);
-		if (var_name)
+		if (input[*i] == '?')
 		{
-			expanded = get_env_value_from_array(var_name, env);
-			if (expanded)
-			{
-				temp = expanded;
-				while (*temp)
-					append_char(buffer, j, *temp++);
-				free(expanded);
-			}
-			free(var_name);
+			append_char(buffer, j, input[*i]);
+			(*i)++;
 		}
-		*i += ft_strlen(var_name);
+		else
+		{
+			while (input[*i] && (ft_isalnum(input[*i]) || input[*i] == '_'))
+			{
+				append_char(buffer, j, input[*i]);
+				(*i)++;
+			}
+		}
 	}
 	else if (input[*i] == '~')
 	{
-		expanded = get_env_value_from_array("HOME", env);
-		if (expanded)
-		{
-			temp = expanded;
-			while (*temp)
-				append_char(buffer, j, *temp++);
-			*i += ft_strlen(input + *i) - 1;
-			free(expanded);
-		}
+		append_char(buffer, j, input[*i]);
+		(*i)++;
 	}
 	else
 	{
 		append_char(buffer, j, input[*i]);
 		(*i)++;
 	}
+	(void)env;
 }
 
 int	process_current_char(const char *input, int *i, char *buffer,

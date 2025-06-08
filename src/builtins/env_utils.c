@@ -6,7 +6,7 @@
 /*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/21 23:30:00 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/06 21:51:05 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/08 00:42:42 by hamzabillah      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,10 @@ char	*get_env_value_from_array(const char *name, char **env)
 	while (env[i])
 	{
 		if (ft_strncmp(env[i], name, len) == 0 && env[i][len] == '=')
-			return (ft_strdup(env[i] + len + 1));
+		{
+			char *value = ft_strdup(env[i] + len + 1);
+			return (value);
+		}
 		i++;
 	}
 	return (NULL);
