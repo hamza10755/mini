@@ -6,7 +6,7 @@
 /*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/11 05:00:00 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/08 15:53:54 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/08 20:48:30 by hamzabillah      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,34 +46,48 @@ static char	*read_heredoc_input(const char *delimiter)
 	char	*line;
 	char	*input;
 	char	*temp;
+	int		pid;
+	int		status;
 
 	input = ft_strdup("");
 	if (!input)
 		return (NULL);
-	while (1)
+	pid = fork();
+	if (pid == 0)
 	{
-		line = readline("> ");
-		if (!line)
+		reset_signals();
+		while (1)
 		{
+			line = readline("> ");
+			if (!line)
+			{
+				free(input);
+				exit(0);
+			}
+			if (ft_strncmp(line, delimiter, ft_strlen(delimiter) + 1) == 0)
+			{
+				free(line);
+				break;
+			}
+			temp = ft_strjoin(input, line);
 			free(input);
-			return (NULL);
-		}
-		if (ft_strncmp(line, delimiter, ft_strlen(delimiter) + 1) == 0)
-		{
 			free(line);
-			break ;
+			if (!temp)
+				exit(1);
+			input = temp;
+			temp = ft_strjoin(input, "\n");
+			free(input);
+			if (!temp)
+				exit(1);
+			input = temp;
 		}
-		temp = ft_strjoin(input, line);
+		exit(0);
+	}
+	waitpid(pid, &status, 0);
+	if (WIFEXITED(status) && WEXITSTATUS(status) == 130)
+	{
 		free(input);
-		free(line);
-		if (!temp)
-			return (NULL);
-		input = temp;
-		temp = ft_strjoin(input, "\n");
-		free(input);
-		if (!temp)
-			return (NULL);
-		input = temp;
+		return (NULL);
 	}
 	return (input);
 }

@@ -6,7 +6,7 @@
 /*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/17 22:03:00 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/06 21:52:49 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/08 20:52:35 by hamzabillah      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,9 +18,13 @@ static void	handle_sigint(int sig)
 {
 	(void)sig;
 	g_signal_status = 130;
-	write(1, "\n", 1);
-	rl_on_new_line();
-	rl_redisplay();
+	if (g_signal_status == 130)
+	{
+		write(1, "\n", 1);
+		//rl_replace_line("", 0); remove the comment 
+		rl_on_new_line();
+		rl_redisplay();
+	}
 }
 
 void	init_signals(void)
