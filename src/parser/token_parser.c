@@ -6,7 +6,7 @@
 /*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/15 18:05:41 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/11 23:26:07 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/11 23:56:09 by hamzabillah      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,12 +18,33 @@ int	handle_operator(const char *input, int *i, char *buffer, size_t *j,
     char	current;
     char	next;
     t_token	*res;
+    t_token *prev;
 
     current = input[*i];
     next = input[*i + 1];
 
     if (!flush_buffer(buffer, j, tokens))
 		return (0);
+
+    // Check for consecutive operators
+    if (tokens && *tokens) {
+        prev = *tokens;
+        while (prev->next)
+            prev = prev->next;
+        if (current == '|' && prev->type == TOKEN_PIPE) {
+            ft_putstr_fd("minishell: syntax error near unexpected token `|'\n", 2);
+            return (0);
+        }
+        if ((current == '>' || current == '<') && 
+            (prev->type == TOKEN_REDIR || prev->type == TOKEN_APPEND || prev->type == TOKEN_HEREDOC)) {
+            ft_putstr_fd("minishell: syntax error near unexpected token '", 2);
+            if (current == '>' && next == '>')
+                ft_putstr_fd(">>'\n", 2);
+            else
+                ft_putstr_fd(">'\n", 2);
+            return (0);
+        }
+    }
 
     if (current == '|')
     {

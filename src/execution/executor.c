@@ -6,11 +6,13 @@
 /*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/17 22:13:20 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/11 22:58:42 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/11 23:40:42 by hamzabillah      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/minishell.h"
+
+extern int g_signal_flag;
 
 int	execute_command_with_path(char *cmd_path, char **args, char **env)
 {
@@ -88,12 +90,19 @@ int	execute_simple_command(t_token *tokens, char ***env, int *exit_status, int i
 			fd_in = STDIN_FILENO;
 			fd_out = STDOUT_FILENO;
 			if (handle_redirections(tokens, &fd_in, &fd_out) != 0)
+			{
+				if (g_signal_flag == SIGINT)
+					*exit_status = 1;
 				return (1);
+			}
 			if (fd_in != STDIN_FILENO)
 				close(fd_in);
 			if (fd_out != STDOUT_FILENO)
 				close(fd_out);
-			*exit_status = 0;
+			if (g_signal_flag == SIGINT)
+				*exit_status = 1;
+			else
+				*exit_status = 0;
 			return (0);
 		}
 		else if (tokens->type == TOKEN_REDIR)

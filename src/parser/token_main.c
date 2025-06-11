@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   token_main.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hbelaih <hbelaih@student.42.amman>         +#+  +:+       +#+        */
+/*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/15 18:06:52 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/11 15:28:36 by hbelaih          ###   ########.fr       */
+/*   Updated: 2025/06/11 23:50:31 by hamzabillah      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,11 +75,23 @@ t_token *process_input(const char *input, char *buffer, char **env)
     size_t  j;
     int     i;
     int     in_word;
+    int     quote_result;
     
     tokens = init_process_vars(&j, &i, &in_word);
     while (input[i])
     {
-        if (!process_current_char(input, &i, buffer, &tokens, &j, &in_word, env))
+        if (input[i] == '\'' || input[i] == '"')
+        {
+            quote_result = handle_quotes(input, &i, buffer, &j);
+            if (!quote_result)
+            {
+                if (tokens)
+                    free_tokens(tokens);
+                ft_putstr_fd("minishell: syntax error: unclosed quote\n", 2);
+                return (NULL);
+            }
+        }
+        else if (!process_current_char(input, &i, buffer, &tokens, &j, &in_word, env))
         {
             if (tokens)
                 free_tokens(tokens);

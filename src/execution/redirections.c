@@ -6,7 +6,7 @@
 /*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/11 05:00:00 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/11 22:57:07 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/11 23:43:41 by hamzabillah      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,14 +16,21 @@ extern int g_signal_flag;
 
 static void heredoc_child_handler(int signum) {
 	(void)signum;
+	g_signal_flag = SIGINT;
 	close(0);
+	exit(1);
 }
 
 static char *read_heredoc_input_fork(const char *delimiter, int write_fd) {
 	char *line = NULL;
 	char *temp = NULL;
+	struct sigaction sa;
 
-	signal(SIGINT, heredoc_child_handler);
+	ft_bzero(&sa, sizeof(sa));
+	sa.sa_handler = heredoc_child_handler;
+	sa.sa_flags = SA_RESTART;
+	sigaction(SIGINT, &sa, NULL);
+
 	while (1) {
 		line = readline("> ");
 		if (!line || ft_strncmp(line, delimiter, ft_strlen(delimiter) + 1) == 0) {
@@ -59,7 +66,7 @@ static int create_heredoc_file(const char *delimiter, int *fd) {
 	}
 	close(pipefd[1]);
 	waitpid(pid, &status, 0);
-	if (WIFSIGNALED(status) && WTERMSIG(status) == SIGINT) {
+	if (WIFSIGNALED(status) || WEXITSTATUS(status) == 1) {
 		close(pipefd[0]);
 		g_signal_flag = SIGINT;
 		return 1;

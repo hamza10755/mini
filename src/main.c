@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hbelaih <hbelaih@student.42.amman>         +#+  +:+       +#+        */
+/*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/15 18:14:32 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/11 11:55:07 by hbelaih          ###   ########.fr       */
+/*   Updated: 2025/06/11 23:52:02 by hamzabillah      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,7 +77,7 @@ int main(void)
             }
             else
             {
-                exit_status = 1;
+                exit_status = 2;
                 set_exit_status_env(exit_status, &env);
             }
         }
