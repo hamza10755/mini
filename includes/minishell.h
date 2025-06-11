@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
+/*   By: hbelaih <hbelaih@student.42.amman>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 19:37:40 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/08 23:18:24 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/11 15:46:11 by hbelaih          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,7 +78,7 @@ char				*allocate_res_buff(char *str);
 // token_builder.c
 int					is_operator(char c);
 t_token				*add_token(t_token **tokens, const char *value, int type);
-void				flush_buffer(char *buffer, size_t *index, t_token **tokens);
+int				flush_buffer(char *buffer, size_t *index, t_token **tokens);
 int					handle_double_operator(const char *input, int *i, char *buf,
 						size_t *j, int type);
 int					handle_single_operator(const char *input, int *i, char *buf,
@@ -91,7 +91,7 @@ int					process_quote_content(const char *input, int *i,
 						char *buffer, size_t *j, char quote_char);
 int					handle_quotes(const char *input, int *i, char *buffer,
 						size_t *j);
-void				handle_whitespace(int *i, char *buffer, size_t *j,
+int				handle_whitespace(int *i, char *buffer, size_t *j,
 						t_token **tokens, int *in_word);
 t_token				*handle_operator_in_word(char *buffer, size_t *j,
 						t_token **tokens, int *in_word);
@@ -109,10 +109,10 @@ t_token				*tokenize(const char *input, char **env);
 // token_debug.c
 const char			*get_token_type_name(int type);
 void				print_tokens(t_token *tokens);
-void				free_tokens(t_token *tokens);
-int					ensure_capacity(char **res, size_t *cap, size_t needed);
-int					copy_expanded_value(char **res, size_t *j, char *expanded,
-						size_t *capacity);
+void                free_tokens(t_token *tokens);
+int                 ensure_capacity(char **res, size_t *cap, size_t needed);
+int                 copy_expanded_value(char **res, size_t *j, char *expanded,
+                        size_t *capacity);
 
 // Environment utilities
 char	**copy_env(char **env);
@@ -140,7 +140,7 @@ int	execute_builtin(t_token *tokens, char **env, int *exit_status);
 // Execution functions
 int	execute_command(t_token *tokens, char ***env, int *exit_status);
 int	execute_pipeline(t_token *tokens, char ***env, int *exit_status);
-void	execute_child_command(t_token *cmd_start, char **env, int is_first_child);
+void	execute_child_command(t_token *cmd_start, char **env, int is_first_child, t_token *tokens);
 int	has_pipe(t_token *tokens);
 int	count_pipes(t_token *tokens);
 
@@ -202,12 +202,13 @@ void print_sorted_env(char **env, int fd_out);
 char	**init_env(char **environ);
 void	free_env_array(char **env);
 int		is_valid_env_var(const char *str);
-int		is_env_var_match(const char *env_var, const char *var_name);
+int	is_env_var_match(const char *env_entry, const char *name, int name_len);
 int		update_env_var_internal(char **env, const char *var);
 void	print_sorted_env(char **env, int fd_out);
 
 /* Token functions */
 void	free_tokens(t_token *tokens);
 void	print_tokens(t_token *tokens);
+void	free_array(char **array);
 
 #endif

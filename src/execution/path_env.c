@@ -3,16 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   path_env.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
+/*   By: hbelaih <hbelaih@student.42.amman>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/11 05:00:00 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/05 17:12:57 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/11 11:23:10 by hbelaih          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/minishell.h"
 
-static void	free_array(char **array)
+void	free_array(char **array)
 {
 	int	i;
 

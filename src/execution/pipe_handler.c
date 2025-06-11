@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   pipe_handler.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
+/*   By: hbelaih <hbelaih@student.42.amman>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/17 22:13:20 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/08 23:17:44 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/11 11:42:29 by hbelaih          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,8 @@ int	count_pipes(t_token *tokens)
 	return (count);
 }
 
-void	execute_child_command(t_token *cmd_start, char **env, int is_first_child)
+void	execute_child_command(t_token *cmd_start, char **env, int is_first_child, 
+		t_token *tokens)
 {
 	char	**args;
 	char	*cmd_path;
@@ -38,14 +39,14 @@ void	execute_child_command(t_token *cmd_start, char **env, int is_first_child)
 	args = convert_tokens_to_args(cmd_start);
 	if (!args)
 		exit(1);
-
 	if (is_builtin(cmd_start))
 	{
 		exit_status = handle_builtin(args, &env, &exit_status, STDOUT_FILENO);
-		free_env_array(args);
+		free_tokens(tokens);
+		free_array(args);
+		free_env_array(env);
 		exit(exit_status);
 	}
-
 	cmd_path = resolve_command_path(args[0], env);
 	if (!cmd_path)
 	{
@@ -54,13 +55,15 @@ void	execute_child_command(t_token *cmd_start, char **env, int is_first_child)
 			ft_putstr_fd(args[0], 2);
 			ft_putstr_fd(": command not found\n", 2);
 		}
-		free_env_array(args);
+		free_tokens(tokens);
+		free_array(args);
+		free_env_array(env);
+		free(cmd_path);
 		exit(127);
 	}
-
 	execve(cmd_path, args, env);
 	free(cmd_path);
-	free_env_array(args);
+	free_array(args);
 	exit(1);
 }
 
@@ -132,7 +135,7 @@ int	execute_pipeline(t_token *tokens, char ***env, int *exit_status)
 					close(pipefd[1]);
 				}
 
-				execute_child_command(cmd_start, *env, is_first_child);
+				execute_child_command(cmd_start, *env, is_first_child, tokens);
 			}
 			if (prev_pipe_read != STDIN_FILENO)
 				close(prev_pipe_read);
@@ -160,7 +163,6 @@ int	execute_pipeline(t_token *tokens, char ***env, int *exit_status)
 				*exit_status = 131;
 		}
 	}
-
 	if (prev_pipe_read != STDIN_FILENO)
 		close(prev_pipe_read);
 

@@ -3,60 +3,72 @@
 /*                                                        :::      ::::::::   */
 /*   token_parser.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
+/*   By: hbelaih <hbelaih@student.42.amman>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/15 18:05:41 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/05 16:29:55 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/11 15:26:46 by hbelaih          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/minishell.h"
 
 int	handle_operator(const char *input, int *i, char *buffer, size_t *j,
-		t_token **tokens)
+        t_token **tokens)
 {
-	char	current;
-	char	next;
+    char	current;
+    char	next;
+    t_token	*res;
 
-	current = input[*i];
-	next = input[*i + 1];
+    current = input[*i];
+    next = input[*i + 1];
 
-	flush_buffer(buffer, j, tokens);
+    if (!flush_buffer(buffer, j, tokens))
+		return (0);
 
-	if (current == '|')
-	{
-		(*i)++;
-		add_token(tokens, "|", TOKEN_PIPE);
-		return (TOKEN_PIPE);
-	}
-	else if (current == '<' && next == '<')
-	{
-		(*i) += 2;
-		add_token(tokens, "<<", TOKEN_HEREDOC);
-		return (TOKEN_HEREDOC);
-	}
-	else if (current == '>' && next == '>')
-	{
-		(*i) += 2;
-		add_token(tokens, ">>", TOKEN_APPEND);
-		return (TOKEN_APPEND);
-	}
-	else if (current == ';')
-	{
-		(*i)++;
-		add_token(tokens, ";", TOKEN_SEMICOLON);
-		return (TOKEN_SEMICOLON);
-	}
-	else if (current == '>' || current == '<')
-	{
-		char op[2];
-		op[0] = current;
-		op[1] = '\0';
-		(*i)++;
-		add_token(tokens, op, TOKEN_REDIR);
-		return (TOKEN_REDIR);
-	}
-	return (0);
+    if (current == '|')
+    {
+        (*i)++;
+        res = add_token(tokens, "|", TOKEN_PIPE);
+        if (!res)
+            return (0);
+        return (TOKEN_PIPE);
+    }
+    else if (current == '<' && next == '<')
+    {
+        (*i) += 2;
+        res = add_token(tokens, "<<", TOKEN_HEREDOC);
+        if (!res)
+            return (0);
+        return (TOKEN_HEREDOC);
+    }
+    else if (current == '>' && next == '>')
+    {
+        (*i) += 2;
+        res = add_token(tokens, ">>", TOKEN_APPEND);
+        if (!res)
+            return (0);
+        return (TOKEN_APPEND);
+    }
+    else if (current == ';')
+    {
+        (*i)++;
+        res = add_token(tokens, ";", TOKEN_SEMICOLON);
+        if (!res)
+            return (0);
+        return (TOKEN_SEMICOLON);
+    }
+    else if (current == '>' || current == '<')
+    {
+        char op[2];
+        op[0] = current;
+        op[1] = '\0';
+        (*i)++;
+        res = add_token(tokens, op, TOKEN_REDIR);
+        if (!res)
+            return (0);
+        return (TOKEN_REDIR);
+    }
+    return (0);
 }
 
 int	process_quote_content(const char *input, int *i, char *buffer, size_t *j,
@@ -93,15 +105,17 @@ int	handle_quotes(const char *input, int *i, char *buffer, size_t *j)
 	return (1);
 }
 
-void	handle_whitespace(int *i, char *buffer, size_t *j, t_token **tokens,
-		int *in_word)
+int	handle_whitespace(int *i, char *buffer, size_t *j, t_token **tokens,
+        int *in_word)
 {
-	if (*in_word)
-	{
-		flush_buffer(buffer, j, tokens);
-		*in_word = 0;
-	}
-	(*i)++;
+    if (*in_word)
+    {
+        if (!flush_buffer(buffer, j, tokens))
+            return (0);
+        *in_word = 0;
+    }
+    (*i)++;
+    return (1);
 }
 
 t_token	*handle_operator_in_word(char *buffer, size_t *j, t_token **tokens,

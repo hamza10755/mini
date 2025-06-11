@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cd.c                                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
+/*   By: hbelaih <hbelaih@student.42.amman>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/21 23:30:00 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/05/17 23:55:11 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/11 15:36:08 by hbelaih          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,26 +38,10 @@ static char	*get_old_pwd(char **env)
 	return (old_pwd);
 }
 
-int	builtin_cd(char **args, char **env)
+static int	change_directory(char *path, char **env)
 {
-	char	*path;
 	char	cwd[PATH_MAX];
 
-	if (!args[1] || ft_strncmp(args[1], "~", 2) == 0)
-	{
-		path = get_home_dir(env);
-		if (!path)
-			return (1);
-	}
-	else if (ft_strncmp(args[1], "-", 2) == 0)
-	{
-		path = get_old_pwd(env);
-		if (!path)
-			return (1);
-		ft_putendl_fd(path, 1);
-	}
-	else
-		path = args[1];
 	if (!getcwd(cwd, PATH_MAX))
 	{
 		ft_putstr_fd("minishell: cd: error getting current directory\n", 2);
@@ -65,7 +49,7 @@ int	builtin_cd(char **args, char **env)
 	}
 	if (chdir(path) == -1)
 	{
-		ft_putstr_fd("minishell: cd: ", 2);
+		ft_putstr_fd((char *)path, 2);
 		ft_putstr_fd(path, 2);
 		ft_putstr_fd(": No such file or directory\n", 2);
 		return (1);
@@ -78,4 +62,36 @@ int	builtin_cd(char **args, char **env)
 	}
 	env = update_env_var(env, "PWD", cwd);
 	return (0);
+}
+
+static char	*resolve_cd_path(char **args, char **env)
+{
+	char	*path;
+
+	if (!args[1] || ft_strncmp(args[1], "~", 2) == 0)
+	{
+		path = get_home_dir(env);
+		if (!path)
+			return (NULL);
+	}
+	else if (ft_strncmp(args[1], "-", 2) == 0)
+	{
+		path = get_old_pwd(env);
+		if (!path)
+			return (NULL);
+		ft_putendl_fd(path, 1);
+	}
+	else
+		path = args[1];
+	return (path);
+}
+
+int	builtin_cd(char **args, char **env)
+{
+	char	*path;
+
+	path = resolve_cd_path(args, env);
+	if (!path)
+		return (1);
+	return (change_directory(path, env));
 }

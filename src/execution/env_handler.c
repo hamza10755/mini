@@ -3,44 +3,44 @@
 /*                                                        :::      ::::::::   */
 /*   env_handler.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
+/*   By: hbelaih <hbelaih@student.42.amman>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/17 21:50:00 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/05 17:10:08 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/11 16:46:09 by hbelaih          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/minishell.h"
 
-t_env	*init_env(char **envp)
-{
-	t_env	*env;
-	t_env	*current;
-	int		i;
+// t_env	*init_env(char **envp)
+// {
+// 	t_env	*env;
+// 	t_env	*current;
+// 	int		i;
 
-	env = NULL;
-	i = 0;
-	while (envp[i])
-	{
-		current = malloc(sizeof(t_env));
-		if (!current)
-		{
-			free_env(env);
-			return (NULL);
-		}
-		current->value = ft_strdup(envp[i]);
-		if (!current->value)
-		{
-			free(current);
-			free_env(env);
-			return (NULL);
-		}
-		current->next = env;
-		env = current;
-		i++;
-	}
-	return (env);
-}
+// 	env = NULL;
+// 	i = 0;
+// 	while (envp[i])
+// 	{
+// 		current = malloc(sizeof(t_env));
+// 		if (!current)
+// 		{
+// 			free_env(env);
+// 			return (NULL);
+// 		}
+// 		current->value = ft_strdup(envp[i]);
+// 		if (!current->value)
+// 		{
+// 			free(current);
+// 			free_env(env);
+// 			return (NULL);
+// 		}
+// 		current->next = env;
+// 		env = current;
+// 		i++;
+// 	}
+// 	return (env);
+// }
 
 void	free_env(t_env *env)
 {

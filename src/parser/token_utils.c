@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   token_utils.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
+/*   By: hbelaih <hbelaih@student.42.amman>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/15 18:04:42 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/06 21:03:04 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/11 15:29:11 by hbelaih          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,21 +30,21 @@ void	append_char(char *buffer, size_t *index, char c)
 
 t_token	*create_new_token(const char *value, int type)
 {
-	t_token	*new_token;
+    t_token	*new_token;
 
-	new_token = malloc(sizeof(t_token));
-	if (!new_token)
-		return (NULL);
-	new_token->value = ft_strdup(value);
-	if (!new_token->value)
-	{
-		free(new_token);
-		return (NULL);
-	}
-	new_token->type = type;
-	new_token->next = NULL;
-	new_token->prev = NULL;
-	return (new_token);
+    new_token = malloc(sizeof(t_token));
+    if (!new_token)
+        return (NULL);
+    new_token->value = ft_strdup(value);
+    if (!new_token->value)
+    {
+        free(new_token);
+        return (NULL);
+    }
+    new_token->type = type;
+    new_token->next = NULL;
+    new_token->prev = NULL;
+    return (new_token);
 }
 
 char	*allocate_res_buff(char *str)
@@ -63,17 +63,17 @@ char	*allocate_res_buff(char *str)
 	return (res);
 }
 
-void	free_tokens(t_token *tokens)
+void    free_tokens(t_token *tokens)
 {
-	t_token	*current;
-	t_token	*next;
+    t_token *current;
+    t_token *next;
 
-	current = tokens;
-	while (current)
-	{
-		next = current->next;
-		free(current->value);
-		free(current);
-		current = next;
-	}
-} 
+    current = tokens;
+    while (current)
+    {
+        next = current->next;
+        free(current->value);
+        free(current);
+        current = next;
+    }
+}

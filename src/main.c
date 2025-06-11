@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
+/*   By: hbelaih <hbelaih@student.42.amman>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/15 18:14:32 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/08 22:50:46 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/11 11:55:07 by hbelaih          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,6 @@ int main(void)
     env = init_env(environ);
     if (!env)
         return (1);
-
     tokens = NULL;
     init_signals();
     saved_stdin = dup(0);
@@ -59,7 +58,8 @@ int main(void)
                     free_tokens(tokens);
                     tokens = NULL;
                 }
-                if (input) {
+                if (input)
+                {
                     free(input);
                     input = NULL;
                 }

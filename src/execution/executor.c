@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   executor.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
+/*   By: hbelaih <hbelaih@student.42.amman>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/17 22:13:20 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/08 23:14:09 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/11 12:12:19 by hbelaih          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,11 +67,10 @@ int	execute_simple_command(t_token *tokens, char ***env, int *exit_status, int i
 	fd_out = STDOUT_FILENO;
 	if (handle_redirections(tokens, &fd_in, &fd_out) != 0)
 	{
-		free(args);
+		free_array(args);
 		*exit_status = 1;
 		return (1);
 	}
-
 	saved_stdin = dup(STDIN_FILENO);
 	saved_stdout = dup(STDOUT_FILENO);
 	if (fd_in != STDIN_FILENO)
@@ -82,7 +81,7 @@ int	execute_simple_command(t_token *tokens, char ***env, int *exit_status, int i
 	if (is_builtin(current))
 	{
 		result = handle_builtin(args, env, exit_status, fd_out);
-		free(args);
+		free_array(args);
 	}
 	else
 	{
@@ -94,7 +93,7 @@ int	execute_simple_command(t_token *tokens, char ***env, int *exit_status, int i
 				ft_putstr_fd(args[0], STDERR_FILENO);
 				ft_putstr_fd(": command not found\n", STDERR_FILENO);
 			}
-			free(args);
+			free_array(args);
 			dup2(saved_stdin, STDIN_FILENO);
 			dup2(saved_stdout, STDOUT_FILENO);
 			close(saved_stdin);
@@ -108,7 +107,7 @@ int	execute_simple_command(t_token *tokens, char ***env, int *exit_status, int i
 		}
 		result = execute_command_with_path(cmd_path, args, *env);
 		free(cmd_path);
-		free(args);
+		free_array(args);
 	}
 	dup2(saved_stdin, STDIN_FILENO);
 	dup2(saved_stdout, STDOUT_FILENO);
