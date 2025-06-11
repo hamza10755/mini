@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   pipe_handler.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hbelaih <hbelaih@student.42.amman>         +#+  +:+       +#+        */
+/*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/17 22:13:20 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/11 11:42:29 by hbelaih          ###   ########.fr       */
+/*   Updated: 2025/06/11 22:57:24 by hamzabillah      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,12 +76,37 @@ int	execute_pipeline(t_token *tokens, char ***env, int *exit_status)
 	t_token	*cmd_start;
 	int		status;
 	int		is_first_child;
+	int		fd_in;
+	int		fd_out;
 
 	prev_pipe_read = STDIN_FILENO;
 	current = tokens;
 	cmd_start = tokens;
 	is_first_child = 1;
 
+	while (current)
+	{
+		if (current->type == TOKEN_HEREDOC)
+		{
+			fd_in = STDIN_FILENO;
+			fd_out = STDOUT_FILENO;
+			if (setup_redirection(current, &fd_in, &fd_out) != 0)
+			{
+				if (prev_pipe_read != STDIN_FILENO)
+					close(prev_pipe_read);
+				return (1);
+			}
+			if (fd_in != STDIN_FILENO)
+			{
+				if (prev_pipe_read != STDIN_FILENO)
+					close(prev_pipe_read);
+				prev_pipe_read = fd_in;
+			}
+		}
+		current = current->next;
+	}
+
+	current = tokens;
 	while (current)
 	{
 		if (current->type == TOKEN_PIPE || !current->next)

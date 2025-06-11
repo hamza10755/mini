@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   executor.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hbelaih <hbelaih@student.42.amman>         +#+  +:+       +#+        */
+/*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/17 22:13:20 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/11 12:12:19 by hbelaih          ###   ########.fr       */
+/*   Updated: 2025/06/11 22:58:42 by hamzabillah      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,13 +56,64 @@ int	execute_simple_command(t_token *tokens, char ***env, int *exit_status, int i
 	int		result;
 	int		saved_stdin;
 	int		saved_stdout;
+	int		has_command;
 
 	current = tokens;
 	if (!current)
 		return (1);
+
+	has_command = 0;
+	while (current)
+	{
+		if (current->type == TOKEN_WORD)
+		{
+			t_token *prev = current->prev;
+			if (!prev || (prev->type != TOKEN_REDIR && 
+				prev->type != TOKEN_APPEND && 
+				prev->type != TOKEN_HEREDOC))
+			{
+				has_command = 1;
+				break;
+			}
+		}
+		if (current->type == TOKEN_PIPE || current->type == TOKEN_SEMICOLON)
+			break;
+		current = current->next;
+	}
+
+	if (!has_command)
+	{
+		if (tokens->type == TOKEN_HEREDOC)
+		{
+			fd_in = STDIN_FILENO;
+			fd_out = STDOUT_FILENO;
+			if (handle_redirections(tokens, &fd_in, &fd_out) != 0)
+				return (1);
+			if (fd_in != STDIN_FILENO)
+				close(fd_in);
+			if (fd_out != STDOUT_FILENO)
+				close(fd_out);
+			*exit_status = 0;
+			return (0);
+		}
+		else if (tokens->type == TOKEN_REDIR)
+		{
+			ft_putstr_fd("minishell: syntax error near unexpected token '>'\n", 2);
+			*exit_status = 2;
+			return (1);
+		}
+		else if (tokens->type == TOKEN_APPEND)
+		{
+			ft_putstr_fd("minishell: syntax error near unexpected token '>>'\n", 2);
+			*exit_status = 2;
+			return (1);
+		}
+	}
+
 	args = convert_tokens_to_args(tokens);
 	if (!args)
 		return (1);
+
 	fd_in = STDIN_FILENO;
 	fd_out = STDOUT_FILENO;
 	if (handle_redirections(tokens, &fd_in, &fd_out) != 0)
@@ -71,6 +122,7 @@ int	execute_simple_command(t_token *tokens, char ***env, int *exit_status, int i
 		*exit_status = 1;
 		return (1);
 	}
+
 	saved_stdin = dup(STDIN_FILENO);
 	saved_stdout = dup(STDOUT_FILENO);
 	if (fd_in != STDIN_FILENO)
@@ -89,9 +141,9 @@ int	execute_simple_command(t_token *tokens, char ***env, int *exit_status, int i
 		if (!cmd_path)
 		{
 			if (!in_pipeline) {
-				ft_putstr_fd("minishill: ", STDERR_FILENO);
-				ft_putstr_fd(args[0], STDERR_FILENO);
-				ft_putstr_fd(": command not found\n", STDERR_FILENO);
+				ft_putstr_fd("minishell: ", 2);
+				ft_putstr_fd(args[0], 2);
+				ft_putstr_fd(": command not found\n", 2);
 			}
 			free_array(args);
 			dup2(saved_stdin, STDIN_FILENO);
@@ -109,6 +161,7 @@ int	execute_simple_command(t_token *tokens, char ***env, int *exit_status, int i
 		free(cmd_path);
 		free_array(args);
 	}
+
 	dup2(saved_stdin, STDIN_FILENO);
 	dup2(saved_stdout, STDOUT_FILENO);
 	close(saved_stdin);
@@ -117,6 +170,7 @@ int	execute_simple_command(t_token *tokens, char ***env, int *exit_status, int i
 		close(fd_in);
 	if (fd_out != STDOUT_FILENO)
 		close(fd_out);
+
 	*exit_status = result;
 	return (result);
 }

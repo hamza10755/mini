@@ -6,7 +6,7 @@
 /*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/11 05:00:00 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/08 22:42:38 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/11 22:57:07 by hamzabillah      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,4 +116,4 @@ void restore_redirections(int fd_in, int fd_out) {
 		close(fd_in);
 	if (fd_out != STDOUT_FILENO)
 		close(fd_out);
-}	
+}
