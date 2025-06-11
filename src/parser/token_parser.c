@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   token_parser.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hbelaih <hbelaih@student.42.amman>         +#+  +:+       +#+        */
+/*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/15 18:05:41 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/11 15:26:46 by hbelaih          ###   ########.fr       */
+/*   Updated: 2025/06/11 23:26:07 by hamzabillah      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,8 @@ int	handle_operator(const char *input, int *i, char *buffer, size_t *j,
     if (current == '|')
     {
         (*i)++;
+        if (!tokens)
+            return (TOKEN_PIPE);
         res = add_token(tokens, "|", TOKEN_PIPE);
         if (!res)
             return (0);
@@ -36,6 +38,8 @@ int	handle_operator(const char *input, int *i, char *buffer, size_t *j,
     else if (current == '<' && next == '<')
     {
         (*i) += 2;
+        if (!tokens)
+            return (TOKEN_HEREDOC);
         res = add_token(tokens, "<<", TOKEN_HEREDOC);
         if (!res)
             return (0);
@@ -44,6 +48,8 @@ int	handle_operator(const char *input, int *i, char *buffer, size_t *j,
     else if (current == '>' && next == '>')
     {
         (*i) += 2;
+        if (!tokens)
+            return (TOKEN_APPEND);
         res = add_token(tokens, ">>", TOKEN_APPEND);
         if (!res)
             return (0);
@@ -52,6 +58,8 @@ int	handle_operator(const char *input, int *i, char *buffer, size_t *j,
     else if (current == ';')
     {
         (*i)++;
+        if (!tokens)
+            return (TOKEN_SEMICOLON);
         res = add_token(tokens, ";", TOKEN_SEMICOLON);
         if (!res)
             return (0);
@@ -63,6 +71,8 @@ int	handle_operator(const char *input, int *i, char *buffer, size_t *j,
         op[0] = current;
         op[1] = '\0';
         (*i)++;
+        if (!tokens)
+            return (TOKEN_REDIR);
         res = add_token(tokens, op, TOKEN_REDIR);
         if (!res)
             return (0);
