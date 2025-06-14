@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   export.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hbelaih <hbelaih@student.42.amman>         +#+  +:+       +#+        */
+/*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/21 23:30:00 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/11 15:55:22 by hbelaih          ###   ########.fr       */
+/*   Updated: 2025/06/15 00:38:09 by hamzabillah      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,76 +48,84 @@ int	is_valid_env_var(const char *var)
 	return (1);
 }
 
-int	update_env_var_internal(char **env, const char *var)
+static int	process_export_args(char **args, t_env **env)
 {
-	int		i;
-	int		var_len;
-	char	*equals;
-
-	if (!env || !var)
-		return (0);
-	equals = ft_strchr(var, '=');
-	if (!equals)
-		return (0);
-	var_len = equals - var;
-	i = -1;
-	while (env[++i])
-	{
-		if (ft_strncmp(env[i], var, var_len) == 0 && env[i][var_len] == '=')
-		{
-			free(env[i]);
-			env[i] = ft_strdup(var);
-			return (1);
-		}
-	}
-	env[i] = ft_strdup(var);
-	if (!env[i])
-		return (0);
-	env[i + 1] = NULL;
-	return (1);
-}
-
-static char	**copy_env1(char **env)
-{
-	int		count = 0;
-	char	**new_env;
-	int		i = 0;
-
-	while (env[count])
-		count++;
-	new_env = malloc(sizeof(char *) * (count + 2));
-	if (!new_env)
-		return (NULL);
-	while (i < count)
-	{
-		new_env[i] = ft_strdup(env[i]);
-		if (!new_env[i])
-		{
-			free_env_array(new_env);
-			return (NULL);
-		}
-		i++;
-	}
-	new_env[count] = NULL;
-	return (new_env);
-}
-
-static int	process_export_args(char **args, char **new_env)
-{
-	int	i = 1;
+	int	i;
 	int	valid;
+	char	*name;
+	char	*value;
+	const char	*equal_sign;
+	char	quote_char;
+	char	*quote_start;
+	char	*quote_end;
 
+	i = 1;
 	while (args[i])
 	{
 		valid = is_valid_env_var(args[i]);
 		if (valid)
 		{
-			if (!update_env_var_internal(new_env, args[i]))
-				return (0);
+			equal_sign = ft_strchr(args[i], '=');
+			if (equal_sign)
+			{
+				name = ft_substr(args[i], 0, equal_sign - args[i]);
+				if (!name)
+					return (0);
+				
+				value = ft_strdup(equal_sign + 1);
+				if (!value)
+				{
+					free(name);
+					return (0);
+				}
+				quote_start = ft_strchr(value, '"');
+				if (!quote_start)
+					quote_start = ft_strchr(value, '\'');
+				
+				if (quote_start)
+				{
+					quote_char = *quote_start;
+					quote_end = ft_strrchr(value, quote_char);
+					if (quote_end && quote_end > quote_start)
+					{
+						*quote_end = '\0';
+						ft_memmove(value, quote_start + 1, ft_strlen(quote_start + 1) + 1);
+					}
+				}
+				else
+				{
+					char *space = ft_strchr(value, ' ');
+					if (space)
+					{
+						*space = '\0';
+						char *next_arg = ft_strdup(space + 1);
+						if (next_arg && is_valid_var_name(next_arg))
+						{
+							set_env_value(next_arg, "", env);
+							free(next_arg);
+						}
+					}
+				}
+				if (set_env_value(name, value, env) != 0)
+				{
+					free(name);
+					free(value);
+					return (0);
+				}
+				free(name);
+				free(value);
+			}
+			else if (is_valid_var_name(args[i]))
+			{
+				if (set_env_value(args[i], "", env) != 0)
+					return (0);
+			}
 		}
 		else
 		{
-			fprintf(stderr, "minishell: export: `%s': not a valid identifier\n", args[i]);
+			ft_putstr_fd("minishell: export: `", 2);
+			ft_putstr_fd(args[i], 2);
+			ft_putstr_fd("': not a valid identifier\n", 2);
 			return (0);
 		}
 		i++;
@@ -125,51 +133,17 @@ static int	process_export_args(char **args, char **new_env)
 	return (1);
 }
 
-char	**builtin_export(char **args, char ***env, int fd_out)
+int	builtin_export(char **args, t_env **env, int fd_out)
 {
-	char	**new_env;
-
 	if (!args || !env || !*env)
-		return (NULL);
+		return (1);
 	if (!args[1])
 	{
-		print_sorted_env(*env, fd_out);
-		return (*env);
+		sort_env(env);
+		print_env(*env, fd_out);
+		return (0);
 	}
-	new_env = copy_env1(*env);
-	if (!new_env)
-		return (NULL);
-	if (!process_export_args(args, new_env))
-	{
-		free_env_array(new_env);
-		return (NULL);
-	}
-	return (new_env);
-}
-
-void print_sorted_env(char **env, int fd_out)
-{
-	int i;
-	int j;
-	char *temp;
-
-	if (!env)
-		return;
-	i = 0;
-	while (env[i])
-	{
-		j = i + 1;
-		while (env[j])
-		{
-			if (ft_strncmp(env[i], env[j], ft_strlen(env[i]) + 1) > 0)
-			{
-				temp = env[i];
-				env[i] = env[j];
-				env[j] = temp;
-			}
-			j++;
-		}
-		ft_putendl_fd(env[i], fd_out);
-		i++;
-	}
+	if (!process_export_args(args, env))
+		return (1);
+	return (0);
 }

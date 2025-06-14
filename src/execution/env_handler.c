@@ -3,44 +3,118 @@
 /*                                                        :::      ::::::::   */
 /*   env_handler.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hbelaih <hbelaih@student.42.amman>         +#+  +:+       +#+        */
+/*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/17 21:50:00 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/11 16:46:09 by hbelaih          ###   ########.fr       */
+/*   Updated: 2025/06/15 00:39:01 by hamzabillah      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/minishell.h"
 
-// t_env	*init_env(char **envp)
-// {
-// 	t_env	*env;
-// 	t_env	*current;
-// 	int		i;
+void	update_shlvl_env(t_env **env)
+{
+	char	*shlvl_str;
+	char	*new_shlvl;
+	int		shlvl;
 
-// 	env = NULL;
-// 	i = 0;
-// 	while (envp[i])
-// 	{
-// 		current = malloc(sizeof(t_env));
-// 		if (!current)
-// 		{
-// 			free_env(env);
-// 			return (NULL);
-// 		}
-// 		current->value = ft_strdup(envp[i]);
-// 		if (!current->value)
-// 		{
-// 			free(current);
-// 			free_env(env);
-// 			return (NULL);
-// 		}
-// 		current->next = env;
-// 		env = current;
-// 		i++;
-// 	}
-// 	return (env);
-// }
+	shlvl_str = get_env_value("SHLVL", *env);
+	if (!shlvl_str)
+	{
+		set_env_value("SHLVL", "1", env);
+		return;
+	}
+	shlvl = ft_atoi(shlvl_str);
+	free(shlvl_str);
+	if (shlvl < 0)
+		shlvl = 0;
+	new_shlvl = ft_itoa(shlvl + 1);
+	if (!new_shlvl)
+		return;
+	set_env_value("SHLVL", new_shlvl, env);
+	free(new_shlvl);
+}
+
+void	update_shlvl_array(char **env)
+{
+	char	*shlvl_str;
+	char	*new_shlvl;
+	int		shlvl;
+	int		i;
+	char	*new_value;
+
+	if (!env)
+		return;
+	i = 0;
+	while (env[i])
+	{
+		if (ft_strncmp(env[i], "SHLVL=", 6) == 0)
+		{
+			shlvl_str = env[i] + 6;
+			shlvl = ft_atoi(shlvl_str);
+			if (shlvl < 0)
+				shlvl = 0;
+			new_shlvl = ft_itoa(shlvl + 1);
+			if (!new_shlvl)
+				return;
+			new_value = ft_strjoin("SHLVL=", new_shlvl);
+			free(new_shlvl);
+			if (!new_value)
+				return;
+			env[i] = new_value;
+			return;
+		}
+		i++;
+	}
+	env[i] = ft_strdup("SHLVL=1");
+	if (!env[i])
+		return;
+	env[i + 1] = NULL;
+}
+
+void	init_shlvl_env(t_env **env)
+{
+	char	*shlvl_str;
+
+	shlvl_str = get_env_value("SHLVL", *env);
+	if (!shlvl_str)
+	{
+		set_env_value("SHLVL", "1", env);
+		return;
+	}
+	free(shlvl_str);
+}
+
+t_env	*init_env(char **envp)
+{
+	t_env	*env;
+	t_env	*current;
+	int		i;
+
+	env = NULL;
+	i = 0;
+	while (envp && envp[i])
+	{
+		current = malloc(sizeof(t_env));
+		if (!current)
+		{
+			free_env(env);
+			return (NULL);
+		}
+		current->value = ft_strdup(envp[i]);
+		if (!current->value)
+		{
+			free(current);
+			free_env(env);
+			return (NULL);
+		}
+		current->next = env;
+		env = current;
+		i++;
+	}
+	init_shlvl_env(&env);
+	return (env);
+}
 
 void	free_env(t_env *env)
 {
@@ -83,7 +157,7 @@ char	**convert_env_to_array(t_env *env)
 		env_array[i] = ft_strdup(current->value);
 		if (!env_array[i])
 		{
-			free_env_array(env_array);
+			free_array(env_array);
 			return (NULL);
 		}
 		current = current->next;
@@ -175,5 +249,66 @@ void	unset_env_value(const char *name, t_env **env)
 		}
 		prev = current;
 		current = current->next;
+	}
+}
+
+int	count_env_vars(t_env *env)
+{
+	int		count;
+	t_env	*current;
+
+	count = 0;
+	current = env;
+	while (current)
+	{
+		count++;
+		current = current->next;
+	}
+	return (count);
+}
+
+void	print_env(t_env *env, int fd_out)
+{
+	t_env	*current;
+
+	current = env;
+	while (current)
+	{
+		if (ft_strchr(current->value, '='))
+		{
+			ft_putstr_fd(current->value, fd_out);
+			ft_putchar_fd('\n', fd_out);
+		}
+		current = current->next;
+	}
+}
+
+void	sort_env(t_env **env)
+{
+	t_env	*current;
+	t_env	*next;
+	char	*temp;
+	int		swapped;
+
+	if (!*env || !(*env)->next)
+		return;
+
+	swapped = 1;
+	while (swapped)
+	{
+		swapped = 0;
+		current = *env;
+		while (current->next)
+		{
+			next = current->next;
+			if (ft_strncmp(current->value, next->value, 1024) > 0)
+			{
+				temp = current->value;
+				current->value = next->value;
+				next->value = temp;
+				swapped = 1;
+			}
+			current = current->next;
+		}
 	}
 } 

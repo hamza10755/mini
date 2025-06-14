@@ -6,7 +6,7 @@
 /*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/15 18:05:41 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/11 23:56:09 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/15 01:05:41 by hamzabillah      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,6 @@ int	handle_operator(const char *input, int *i, char *buffer, size_t *j,
     if (!flush_buffer(buffer, j, tokens))
 		return (0);
 
-    // Check for consecutive operators
     if (tokens && *tokens) {
         prev = *tokens;
         while (prev->next)

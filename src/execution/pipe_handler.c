@@ -6,7 +6,7 @@
 /*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/17 22:13:20 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/11 22:57:24 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/12 14:51:38 by hamzabillah      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,26 +28,33 @@ int	count_pipes(t_token *tokens)
 	return (count);
 }
 
-void	execute_child_command(t_token *cmd_start, char **env, int is_first_child, 
+void	execute_child_command(t_token *cmd_start, t_env *env, int is_first_child, 
 		t_token *tokens)
 {
 	char	**args;
 	char	*cmd_path;
 	int		exit_status;
+	char	**env_array;
 
 	reset_signals();
 	args = convert_tokens_to_args(cmd_start);
 	if (!args)
 		exit(1);
+	env_array = convert_env_to_array(env);
+	if (!env_array)
+	{
+		free_array(args);
+		exit(1);
+	}
 	if (is_builtin(cmd_start))
 	{
 		exit_status = handle_builtin(args, &env, &exit_status, STDOUT_FILENO);
 		free_tokens(tokens);
 		free_array(args);
-		free_env_array(env);
+		free_array(env_array);
 		exit(exit_status);
 	}
-	cmd_path = resolve_command_path(args[0], env);
+	cmd_path = resolve_command_path(args[0], env_array);
 	if (!cmd_path)
 	{
 		if (is_first_child) {
@@ -57,17 +64,18 @@ void	execute_child_command(t_token *cmd_start, char **env, int is_first_child,
 		}
 		free_tokens(tokens);
 		free_array(args);
-		free_env_array(env);
+		free_array(env_array);
 		free(cmd_path);
 		exit(127);
 	}
-	execve(cmd_path, args, env);
+	execve(cmd_path, args, env_array);
 	free(cmd_path);
 	free_array(args);
+	free_array(env_array);
 	exit(1);
 }
 
-int	execute_pipeline(t_token *tokens, char ***env, int *exit_status)
+int	execute_pipeline(t_token *tokens, t_env **env, int *exit_status)
 {
 	int		pipefd[2];
 	int		prev_pipe_read;

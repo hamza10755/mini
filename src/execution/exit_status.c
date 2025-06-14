@@ -6,7 +6,7 @@
 /*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/17 21:50:00 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/06 21:57:05 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/12 14:45:44 by hamzabillah      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,20 +25,14 @@ void update_exit_status(int wait_status, int *exit_status)
 		*exit_status = 128 + WTERMSIG(wait_status);
 }
 
-void set_exit_status_env(int exit_status, char ***env)
+void set_exit_status_env(int exit_status, t_env **env)
 {
 	char *status_str;
-	char **new_env;
 
 	status_str = ft_itoa(exit_status);
 	if (!status_str)
 		return;
 	
-	new_env = update_env_var(*env, "?", status_str);
+	set_env_value("?", status_str, env);
 	free(status_str);
-	if (new_env)
-	{
-		free_env_array(*env);
-		*env = new_env;
-	}
 } 

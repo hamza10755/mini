@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/03/15 18:14:32 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/11 23:52:02 by hamzabillah      ###   ########.fr       */
+/*   Created: 2025/04/21 23:30:00 by hamzabillah       #+#    #+#             */
+/*   Updated: 2025/06/15 01:05:58 by hamzabillah      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ int main(void)
     char        *input;
     t_token     *tokens;
     extern char **environ;
-    char        **env;
+    t_env       *env;
     int         exit_status;
     int         saved_stdin;
     
@@ -48,11 +48,11 @@ int main(void)
             if (!ft_strncmp(input, "exit", 5))
             {
                 free(input);
-                free_env_array(env);
+                free_env(env);
                 env = NULL;
                 exit(exit_status);
             }
-            tokens = tokenize(input, env);
+            tokens = tokenize(input, convert_env_to_array(env), &exit_status);
             if (g_signal_flag == SIGINT) {
                 if (tokens) {
                     free_tokens(tokens);
@@ -77,7 +77,8 @@ int main(void)
             }
             else
             {
-                exit_status = 2;
+                if (exit_status != 258)
+                    exit_status = 2;
                 set_exit_status_env(exit_status, &env);
             }
         }
@@ -89,7 +90,7 @@ int main(void)
         reset_signal_status();
     }
     if (env) {
-        free_env_array(env);
+        free_env(env);
         env = NULL;
     }
     return (exit_status);

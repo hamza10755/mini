@@ -19,6 +19,7 @@ SRCS = main.c \
        execution/signals.c \
        execution/exit_status.c \
        execution/pipe_handler.c \
+       execution/env_handler.c \
        builtins/builtin_handler.c \
        builtins/cd.c \
        builtins/echo.c \

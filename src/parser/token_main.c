@@ -6,11 +6,11 @@
 /*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/15 18:06:52 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/11 23:50:31 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/15 01:05:33 by hamzabillah      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../includes/minishell.h"
+#include "minishell.h"
 
 void	handle_word(const char *input, int *i, char *buffer, size_t *j,
 		int *in_word, char **env)
@@ -119,13 +119,178 @@ t_token	*init_process_vars(size_t *j, int *i, int *in_word)
 	return (NULL);
 }
 
-t_token	*tokenize(const char *input, char **env)
+static int	process_word(const char *input, size_t *i, t_token **tokens)
 {
-	char	buffer[1024];
-	t_token	*tokens;
+	size_t	start;
+	char	*word;
+	int		in_quotes;
+	char	quote_char;
+	int		found_equals;
 
+	start = *i;
+	in_quotes = 0;
+	quote_char = 0;
+	found_equals = 0;
+	while (input[*i] && (!isspace(input[*i]) || in_quotes || found_equals))
+	{
+		if ((input[*i] == '"' || input[*i] == '\'') && !in_quotes)
+		{
+			in_quotes = 1;
+			quote_char = input[*i];
+		}
+		else if (input[*i] == quote_char && in_quotes)
+			in_quotes = 0;
+		else if (input[*i] == '=' && !in_quotes)
+			found_equals = 1;
+		(*i)++;
+	}
+	word = ft_substr(input, start, *i - start);
+	if (!word)
+		return (0);
+	if (!add_token(tokens, word, TOKEN_WORD))
+	{
+		free(word);
+		return (0);
+	}
+	return (1);
+}
+
+static int	process_redirection(const char *input, size_t *i, t_token **tokens, int *exit_status)
+{
+	if (input[*i] == '<')
+	{
+		if (input[*i + 1] == '<')
+		{
+			if (input[*i + 2] == '<')
+			{
+				ft_putstr_fd("minishell: syntax error near unexpected token '<<<'\n", 2);
+				*exit_status = 258;
+				return (0);
+			}
+			else
+			{
+				if (!add_token(tokens, "<<", TOKEN_HEREDOC))
+					return (0);
+				*i += 2;
+			}
+		}
+		else
+		{
+			if (!add_token(tokens, "<", TOKEN_REDIR))
+				return (0);
+			(*i)++;
+		}
+	}
+	else if (input[*i] == '>')
+	{
+		if (input[*i + 1] == '>')
+		{
+			if (input[*i + 2] == '>')
+			{
+				ft_putstr_fd("minishell: syntax error near unexpected token '>'\n", 2);
+				*exit_status = 258;
+				return (0);
+			}
+			else
+			{
+				if (!add_token(tokens, ">>", TOKEN_APPEND))
+					return (0);
+				*i += 2;
+			}
+		}
+		else
+		{
+			if (!add_token(tokens, ">", TOKEN_REDIR))
+				return (0);
+			(*i)++;
+		}
+	}
+	return (1);
+}
+
+static int	check_syntax_error(const char *input, size_t i, t_token **tokens, int *exit_status)
+{
+	t_token	*last_token;
+
+	if (input[i] == '|')
+	{
+		last_token = *tokens;
+		while (last_token && last_token->next)
+			last_token = last_token->next;
+		if (last_token && last_token->type == TOKEN_PIPE)
+		{
+			ft_putstr_fd("minishell: syntax error near unexpected token `|'\n", 2);
+			return (0);
+		}
+	}
+
+	if (input[i] == '>' || input[i] == '<')
+	{
+		last_token = *tokens;
+		while (last_token && last_token->next)
+			last_token = last_token->next;
+		if (last_token && (last_token->type == TOKEN_REDIR || 
+			last_token->type == TOKEN_APPEND || last_token->type == TOKEN_HEREDOC))
+		{
+			ft_putstr_fd("minishell: syntax error near unexpected token '", 2);
+			if (input[i] == '>' && input[i + 1] == '>')
+				ft_putstr_fd(">>'\n", 2);
+			else
+				ft_putstr_fd(">'\n", 2);
+			return (0);
+		}
+	}
+
+	if (input[i] == '>' && input[i + 1] == '>' && input[i + 2] == '>')
+	{
+		ft_putstr_fd("minishell: syntax error near unexpected token '>>'\n", 2);
+		return (0);
+	}
+
+	if (input[i] == '|' && input[i + 1] == '|')
+	{
+		ft_putstr_fd("minishell: syntax error near unexpected token '||'\n", 2);
+		*exit_status = 258;
+		return (0);
+	}
+
+	return (1);
+}
+
+t_token	*tokenize(const char *input, char **env, int *exit_status)
+{
+	t_token *tokens;
+	size_t	i;
+
+	(void)env;
 	if (!input)
 		return (NULL);
-	tokens = process_input(input, buffer, env);
+	tokens = NULL;
+	i = 0;
+	while (input[i])
+	{
+		if (isspace(input[i]))
+			i++;
+		else if (input[i] == '|')
+		{
+			if (!check_syntax_error(input, i, &tokens, exit_status))
+				return (free_tokens(tokens), NULL);
+			if (!add_token(&tokens, "|", TOKEN_PIPE))
+				return (free_tokens(tokens), NULL);
+			i++;
+		}
+		else if (input[i] == '<' || input[i] == '>')
+		{
+			if (!check_syntax_error(input, i, &tokens, exit_status))
+				return (free_tokens(tokens), NULL);
+			if (!process_redirection(input, &i, &tokens, exit_status))
+				return (free_tokens(tokens), NULL);
+		}
+		else
+		{
+			if (!process_word(input, &i, &tokens))
+				return (free_tokens(tokens), NULL);
+		}
+	}
 	return (tokens);
 }

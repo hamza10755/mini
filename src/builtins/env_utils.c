@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   env_utils.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hbelaih <hbelaih@student.42.amman>         +#+  +:+       +#+        */
+/*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/21 23:30:00 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/11 15:48:22 by hbelaih          ###   ########.fr       */
+/*   Updated: 2025/06/12 14:52:38 by hamzabillah      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ char	*get_env_value_from_array(const char *name, char **env)
 	return (NULL);
 }
 
-int	count_env_vars(char **env)
+int	count_env_vars_array(char **env)
 {
 	int	count;
 
@@ -69,7 +69,7 @@ char	**copy_env(char **env)
 
 	if (!env || !env[0])
 		return (NULL);
-	count = count_env_vars(env);
+	count = count_env_vars_array(env);
 	if (count == 0)
 		return (NULL);
 	new_env = (char **)malloc(sizeof(char *) * (count + 1));
@@ -132,7 +132,7 @@ char	**add_env_var(char **env, const char *name, const char *value)
 	int		count;
 	int		i;
 
-	count = count_env_vars(env);
+	count = count_env_vars_array(env);
 	new_env = copy_env_to_new(env, count);
 	if (!new_env)
 		return (NULL);
@@ -245,7 +245,7 @@ char	**update_env_var(char **env, const char *name, const char *value)
 	if (!env || !name || !value)
 		return (NULL);
 	len = ft_strlen(name);
-	count = count_env_vars(env);
+	count = count_env_vars_array(env);
 	i = 0;
 	while (env[i])
 	{
@@ -301,7 +301,7 @@ char	**remove_env_var(char **env, const char *name)
 	if (!env || !name)
 		return (NULL);
 	name_len = ft_strlen(name);
-	count = count_env_vars(env);
+	count = count_env_vars_array(env);
 	new_env = copy_env_excluding_var(env, name, name_len, count);
 	if (!new_env)
 		return (env);

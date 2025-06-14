@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/03/15 18:03:41 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/08 15:40:26 by hamzabillah      ###   ########.fr       */
+/*   Created: 2025/04/21 23:30:00 by hamzabillah       #+#    #+#             */
+/*   Updated: 2025/06/15 01:04:15 by hamzabillah      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -294,7 +294,7 @@ char *expand_string(const char *input, char **env, int *exit_status)
     return (result);
 }
 
-void expand_tokens(t_token *tokens, char **env, int *exit_status)
+void expand_tokens(t_token *tokens, t_env *env, int *exit_status)
 {
     t_token *current;
     t_token *next;
@@ -302,77 +302,108 @@ void expand_tokens(t_token *tokens, char **env, int *exit_status)
     char    **split_tokens;
     int     i;
     int     is_command;
+    char    **env_array;
+    int     is_export;
+    int     is_export_value;
+    char    *equal_sign;
+    char    *quote_start;
+    char    *quote_end;
 
     current = tokens;
     is_command = 1;
+    is_export = 0;
+    env_array = convert_env_to_array(env);
+    if (!env_array)
+        return;
+
+    if (current && current->type == TOKEN_WORD && ft_strncmp(current->value, "export", 6) == 0)
+        is_export = 1;
+
     while (current)
     {
         next = current->next;
         if (current->type == TOKEN_WORD)
         {
-            expanded = expand_string(current->value, env, exit_status);
-            if (expanded)
+            is_export_value = 0;
+            if (is_export)
             {
-                if (ft_strchr(expanded, ' ') != NULL && !is_command)
+                equal_sign = ft_strchr(current->value, '=');
+                if (equal_sign)
                 {
-                    split_tokens = ft_split(expanded, ' ');
-                    if (split_tokens)
+                    quote_start = ft_strchr(equal_sign, '"');
+                    if (!quote_start)
+                        quote_start = ft_strchr(equal_sign, '\'');
+                    if (quote_start)
                     {
-                        free(current->value);
-                        current->value = ft_strdup(split_tokens[0]);
-                        
-                        i = 1;
-                        while (split_tokens[i])
-                        {
-                            t_token *new_token = malloc(sizeof(t_token));
-                            if (!new_token)
-                                break;
-                            new_token->value = ft_strdup(split_tokens[i]);
-                            new_token->type = TOKEN_WORD;
-                            new_token->exit_status = *exit_status;
-                            new_token->next = NULL;
-                            new_token->prev = NULL;
-                            new_token->next = current->next;
-                            if (current->next)
-                                current->next->prev = new_token;
-                            new_token->prev = current;
-                            current->next = new_token;
-                            
-                            current = new_token;
-                            
-                            i++;
-                        }                        
-                        i = 0;
-                        while (split_tokens[i])
-                            free(split_tokens[i++]);
-                        free(split_tokens);
+                        quote_end = ft_strrchr(quote_start, *quote_start);
+                        if (quote_end && quote_end > quote_start)
+                            is_export_value = 1;
                     }
-                    free(expanded);
                 }
-                else
+            }
+
+            if (is_export_value)
+            {
+                expanded = ft_strdup(current->value);
+                if (expanded)
                 {
                     free(current->value);
-                    current->value = ft_strdup(expanded);
-                    free(expanded);
+                    current->value = expanded;
+                }
+            }
+            else
+            {
+                expanded = expand_string(current->value, env_array, exit_status);
+                if (expanded)
+                {
+                    if (ft_strchr(expanded, ' ') != NULL && !is_command)
+                    {
+                        split_tokens = ft_split(expanded, ' ');
+                        if (split_tokens)
+                        {
+                            free(current->value);
+                            current->value = ft_strdup(split_tokens[0]);
+                            
+                            i = 1;
+                            while (split_tokens[i])
+                            {
+                                t_token *new_token = malloc(sizeof(t_token));
+                                if (!new_token)
+                                    break;
+                                new_token->value = ft_strdup(split_tokens[i]);
+                                new_token->type = TOKEN_WORD;
+                                new_token->exit_status = *exit_status;
+                                new_token->next = NULL;
+                                new_token->prev = NULL;
+                                new_token->next = current->next;
+                                if (current->next)
+                                    current->next->prev = new_token;
+                                new_token->prev = current;
+                                current->next = new_token;
+                                
+                                current = new_token;
+                                
+                                i++;
+                            }                        
+                            i = 0;
+                            while (split_tokens[i])
+                                free(split_tokens[i++]);
+                            free(split_tokens);
+                        }
+                        free(expanded);
+                    }
+                    else
+                    {
+                        free(current->value);
+                        current->value = ft_strdup(expanded);
+                        free(expanded);
+                    }
                 }
             }
         }
         current = next;
         is_command = 0;
     }
-}
-
-char *get_env_value(const char *name, char **env)
-{
-    while (*env)
-    {
-        if (ft_strncmp(*env, name, ft_strlen(name)) == 0
-            && (*env)[ft_strlen(name)] == '=')
-        {
-            return ft_strdup(*env + ft_strlen(name) + 1);
-        }
-        env++;
-    }
-    return NULL;
+    free_array(env_array);
 }
 

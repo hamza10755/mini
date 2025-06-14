@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   token_builder.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hbelaih <hbelaih@student.42.amman>         +#+  +:+       +#+        */
+/*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/15 18:05:41 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/11 15:23:02 by hbelaih          ###   ########.fr       */
+/*   Updated: 2025/06/15 01:03:40 by hamzabillah      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,10 +49,10 @@ int	flush_buffer(char *buffer, size_t *index, t_token **tokens)
         buffer[*index] = '\0';
         res = add_token(tokens, buffer, TOKEN_WORD);
         if (!res)
-            return (0);  // Error occurred
+            return (0);
         *index = 0;
     }
-    return (1);  // Success or nothing to do
+    return (1);
 }
 
 int	handle_double_operator(const char *input, int *i, char *buf, size_t *j,
