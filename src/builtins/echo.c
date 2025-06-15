@@ -6,31 +6,34 @@
 /*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/21 23:30:00 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/15 00:34:16 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/15 23:22:25 by hamzabillah      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/minishell.h"
 
-int	builtin_echo(char **args, int fd_out)
+static int	check_n_flag(char *arg, int *newline)
 {
-	int	i;
-	int	newline;
 	int	j;
 
-	i = 1;
-	newline = 1;
-	if (args[1] && args[1][0] == '-')
+	if (!arg || arg[0] != '-')
+		return (0);
+	j = 1;
+	while (arg[j] == 'n')
+		j++;
+	if (arg[j] == '\0' && j > 1)
 	{
-		j = 1;
-		while (args[1][j] == 'n')
-			j++;
-		if (args[1][j] == '\0' && j > 1)
-		{
-			newline = 0;
-			i++;
-		}
+		*newline = 0;
+		return (1);
 	}
+	return (0);
+}
+
+static void	print_args(char **args, int start, int fd_out)
+{
+	int	i;
+
+	i = start;
 	while (args[i])
 	{
 		ft_putstr_fd(args[i], fd_out);
@@ -38,6 +41,18 @@ int	builtin_echo(char **args, int fd_out)
 			ft_putchar_fd(' ', fd_out);
 		i++;
 	}
+}
+
+int	builtin_echo(char **args, int fd_out)
+{
+	int	i;
+	int	newline;
+
+	i = 1;
+	newline = 1;
+	if (args[1] && check_n_flag(args[1], &newline))
+		i++;
+	print_args(args, i, fd_out);
 	if (newline)
 		ft_putchar_fd('\n', fd_out);
 	return (0);

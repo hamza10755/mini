@@ -6,7 +6,7 @@
 /*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/21 23:30:00 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/12 14:52:38 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/16 00:02:54 by hamzabillah      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -331,4 +331,9 @@ void	sort_env_vars(char **env)
 		}
 		i++;
 	}
+}
+void	cleanup_env(char **env)
+{
+	if (env)
+		free_array(env);
 }

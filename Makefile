@@ -28,7 +28,6 @@ SRCS = main.c \
        builtins/pwd.c \
        builtins/unset.c \
        builtins/env_utils.c \
-       builtins/env_state.c \
        builtins/exit.c
 
 SRC_FILES = $(addprefix $(SRC)/, $(SRCS))

@@ -22,7 +22,7 @@ void	update_shlvl_env(t_env **env)
 	if (!shlvl_str)
 	{
 		set_env_value("SHLVL", "1", env);
-		return;
+		return ;
 	}
 	shlvl = ft_atoi(shlvl_str);
 	free(shlvl_str);
@@ -30,7 +30,7 @@ void	update_shlvl_env(t_env **env)
 		shlvl = 0;
 	new_shlvl = ft_itoa(shlvl + 1);
 	if (!new_shlvl)
-		return;
+		return ;
 	set_env_value("SHLVL", new_shlvl, env);
 	free(new_shlvl);
 }
@@ -64,11 +64,11 @@ static void	update_shlvl_value(char **env, int idx)
 		shlvl = 0;
 	new_shlvl = ft_itoa(shlvl + 1);
 	if (!new_shlvl)
-		return;
+		return ;
 	new_value = ft_strjoin("SHLVL=", new_shlvl);
 	free(new_shlvl);
 	if (!new_value)
-		return;
+		return ;
 	env[idx] = new_value;
 }
 
@@ -78,19 +78,19 @@ void	update_shlvl_array(char **env)
 	int	i;
 
 	if (!env)
-		return;
+		return ;
 	idx = find_shlvl_index(env);
 	if (idx >= 0)
 	{
 		update_shlvl_value(env, idx);
-		return;
+		return ;
 	}
 	i = 0;
 	while (env[i])
 		i++;
 	env[i] = ft_strdup("SHLVL=1");
 	if (!env[i])
-		return;
+		return ;
 	env[i + 1] = NULL;
 }
 
@@ -102,7 +102,7 @@ void	init_shlvl_env(t_env **env)
 	if (!shlvl_str)
 	{
 		set_env_value("SHLVL", "1", env);
-		return;
+		return ;
 	}
 	free(shlvl_str);
 }
@@ -173,9 +173,11 @@ void	free_env(t_env *env)
 
 static int	count_env_nodes(t_env *env)
 {
-	int		count = 0;
-	t_env	*current = env;
+	int		count;
+	t_env	*current;
 
+	count = 0;
+	current = env;
 	while (current)
 	{
 		count++;
@@ -186,9 +188,11 @@ static int	count_env_nodes(t_env *env)
 
 static int	fill_env_array(char **env_array, t_env *env, int count)
 {
-	int		i = 0;
-	t_env	*current = env;
+	int		i;
+	t_env	*current;
 
+	i = 0;
+	current = env;
 	while (i < count)
 	{
 		env_array[i] = ft_strdup(current->value);
@@ -210,7 +214,6 @@ char	**convert_env_to_array(t_env *env)
 	env_array = malloc((count + 1) * sizeof(char *));
 	if (!env_array)
 		return (NULL);
-
 	filled = fill_env_array(env_array, env, count);
 	if (filled != count)
 	{
@@ -240,10 +243,13 @@ char	*get_env_value(const char *name, t_env *env)
 
 static char	*create_env_value(const char *name, const char *value)
 {
-	size_t	name_len = ft_strlen(name);
-	size_t	value_len = ft_strlen(value);
-	char	*new_value = malloc(name_len + value_len + 2);
+	size_t	name_len;
+	size_t	value_len;
+	char	*new_value;
 
+	name_len = ft_strlen(name);
+	value_len = ft_strlen(value);
+	new_value = malloc(name_len + value_len + 2);
 	if (!new_value)
 		return (NULL);
 	ft_strlcpy(new_value, name, name_len + 1);
@@ -261,9 +267,10 @@ static int	update_env_node(t_env *current, char *new_value)
 
 static int	add_env_node(const char *name, char *new_value, t_env **env)
 {
-	(void)name;
-	t_env	*new_node = malloc(sizeof(t_env));
+	t_env	*new_node;
 
+	(void)name;
+	new_node = malloc(sizeof(t_env));
 	if (!new_node)
 	{
 		free(new_value);
@@ -279,8 +286,9 @@ int	set_env_value(const char *name, const char *value, t_env **env)
 {
 	t_env	*current;
 	char	*new_value;
-	size_t	name_len = ft_strlen(name);
+	size_t	name_len;
 
+	name_len = ft_strlen(name);
 	new_value = create_env_value(name, value);
 	if (!new_value)
 		return (1);
@@ -289,10 +297,10 @@ int	set_env_value(const char *name, const char *value, t_env **env)
 	{
 		if (ft_strncmp(current->value, name, name_len) == 0
 			&& current->value[name_len] == '=')
-			return update_env_node(current, new_value);
+			return (update_env_node(current, new_value));
 		current = current->next;
 	}
-	return add_env_node(name, new_value, env);
+	return (add_env_node(name, new_value, env));
 }
 
 void	unset_env_value(const char *name, t_env **env)
@@ -304,7 +312,6 @@ void	unset_env_value(const char *name, t_env **env)
 	name_len = ft_strlen(name);
 	current = *env;
 	prev = NULL;
-
 	while (current)
 	{
 		if (ft_strncmp(current->value, name, name_len) == 0
@@ -316,7 +323,7 @@ void	unset_env_value(const char *name, t_env **env)
 				*env = current->next;
 			free(current->value);
 			free(current);
-			return;
+			return ;
 		}
 		prev = current;
 		current = current->next;
@@ -362,7 +369,7 @@ void	sort_env(t_env **env)
 	int		swapped;
 
 	if (!*env || !(*env)->next)
-		return;
+		return ;
 	swapped = 1;
 	while (swapped)
 	{
@@ -381,4 +388,4 @@ void	sort_env(t_env **env)
 			current = current->next;
 		}
 	}
-} 
+}

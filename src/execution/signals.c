@@ -2,7 +2,7 @@
 #include <signal.h>
 #include <unistd.h>
 
-int	g_signal_flag = 0;
+int		g_signal_flag = 0;
 
 void	handle_sigint(int sig)
 {
@@ -68,4 +68,4 @@ void	init_signals(void)
 void	reset_signal_status(void)
 {
 	g_signal_flag = 0;
-} 
+}

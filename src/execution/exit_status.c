@@ -12,12 +12,12 @@
 
 #include "../../includes/minishell.h"
 
-int get_exit_status(int exit_status)
+int	get_exit_status(int exit_status)
 {
-	return exit_status;
+	return (exit_status);
 }
 
-void update_exit_status(int wait_status, int *exit_status)
+void	update_exit_status(int wait_status, int *exit_status)
 {
 	if (WIFEXITED(wait_status))
 		*exit_status = WEXITSTATUS(wait_status);
@@ -25,14 +25,13 @@ void update_exit_status(int wait_status, int *exit_status)
 		*exit_status = 128 + WTERMSIG(wait_status);
 }
 
-void set_exit_status_env(int exit_status, t_env **env)
+void	set_exit_status_env(int exit_status, t_env **env)
 {
-	char *status_str;
+	char	*status_str;
 
 	status_str = ft_itoa(exit_status);
 	if (!status_str)
-		return;
-	
+		return ;
 	set_env_value("?", status_str, env);
 	free(status_str);
-} 
+}

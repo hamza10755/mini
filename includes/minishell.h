@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hbelaih <hbelaih@student.42.amman>         +#+  +:+       +#+        */
+/*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 19:37:40 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/15 15:18:18 by hbelaih          ###   ########.fr       */
+/*   Updated: 2025/06/15 22:47:18 by hamzabillah      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,7 +118,7 @@ int		handle_whitespace(int *i, char *buffer, size_t *j, t_token **tokens, int *i
 t_token	*handle_operator_in_word(char *buffer, size_t *j, t_token **tokens, int *in_word);
 
 // Token main functions
-void	handle_word(const char *input, int *i, char *buffer, size_t *j, int *in_word, char **env);
+void	handle_word(const char *input, int *i, char *buffer, size_t *j, int *in_word);
 int		process_current_char(const char *input, int *i, char *buffer, t_token **tokens, size_t *j, int *in_word, char **env);
 t_token	*process_input(const char *input, char *buffer, char **env);
 t_token	*init_process_vars(size_t *j, int *i, int *in_word);
