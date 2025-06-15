@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
+/*   By: hbelaih <hbelaih@student.42.amman>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 19:37:40 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/15 00:53:18 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/15 15:18:18 by hbelaih          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,12 +100,12 @@ void	expand_tokens(t_token *tokens, t_env *env, int *exit_status);
 int		is_quote(char c);
 int		is_whitespace(char c);
 void	append_char(char *buffer, size_t *index, char c);
-t_token	*create_new_token(const char *value, int type);
+t_token	*create_new_token(char *value, int type);
 char	*allocate_res_buff(char *str);
 
 // Token builder functions
 int		is_operator(char c);
-t_token	*add_token(t_token **tokens, const char *value, int type);
+t_token	*add_token(t_token **tokens,  char *value, int type);
 int		flush_buffer(char *buffer, size_t *index, t_token **tokens);
 int		handle_double_operator(const char *input, int *i, char *buf, size_t *j, int type);
 int		handle_single_operator(const char *input, int *i, char *buf, size_t *j, int type);
@@ -122,7 +122,7 @@ void	handle_word(const char *input, int *i, char *buffer, size_t *j, int *in_wor
 int		process_current_char(const char *input, int *i, char *buffer, t_token **tokens, size_t *j, int *in_word, char **env);
 t_token	*process_input(const char *input, char *buffer, char **env);
 t_token	*init_process_vars(size_t *j, int *i, int *in_word);
-t_token	*tokenize(const char *input, char **env, int *exit_status);
+t_token	*tokenize(const char *input, int *exit_status);
 
 // Builtin handler functions
 int	is_builtin(t_token *tokens);

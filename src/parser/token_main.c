@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   token_main.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
+/*   By: hbelaih <hbelaih@student.42.amman>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/15 18:06:52 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/15 01:05:33 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/15 15:10:53 by hbelaih          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -257,12 +257,11 @@ static int	check_syntax_error(const char *input, size_t i, t_token **tokens, int
 	return (1);
 }
 
-t_token	*tokenize(const char *input, char **env, int *exit_status)
+t_token	*tokenize(const char *input,  int *exit_status)
 {
 	t_token *tokens;
 	size_t	i;
 
-	(void)env;
 	if (!input)
 		return (NULL);
 	tokens = NULL;

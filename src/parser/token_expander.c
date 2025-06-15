@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   token_expander.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
+/*   By: hbelaih <hbelaih@student.42.amman>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/21 23:30:00 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/15 01:04:15 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/15 16:41:16 by hbelaih          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -395,8 +395,7 @@ void expand_tokens(t_token *tokens, t_env *env, int *exit_status)
                     else
                     {
                         free(current->value);
-                        current->value = ft_strdup(expanded);
-                        free(expanded);
+                        current->value = expanded;
                     }
                 }
             }

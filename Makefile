@@ -1,6 +1,6 @@
 NAME = minishell
 CC = cc
-CFLAGS = -Wall -Wextra -Werror -I./includes -g
+CFLAGS = -Wall -Wextra -Werror -I./includes -g3 
 LDFLAGS = -lreadline -lncurses
 
 SRC = src
@@ -42,7 +42,7 @@ all: $(NAME)
 	@$(CC) $(CFLAGS) -c $< -o $@
 
 $(NAME): $(LIBFT) $(OBJ_FILES)
-	@$(CC) $(OBJ_FILES) -L$(LIBFTDIR) -lft -o $(NAME) $(LDFLAGS)
+	@$(CC) $(OBJ_FILES) -L$(LIBFTDIR) -lft -o $(NAME) $(LDFLAGS)       
 
 $(LIBFT):
 	@make -C $(LIBFTDIR)

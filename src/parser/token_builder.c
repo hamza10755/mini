@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   token_builder.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
+/*   By: hbelaih <hbelaih@student.42.amman>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/15 18:05:41 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/15 01:03:40 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/15 15:17:54 by hbelaih          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ int	is_operator(char c)
 	return (c == '|' || c == '<' || c == '>' || c == ';');
 }
 
-t_token	*add_token(t_token **tokens, const char *value, int type)
+t_token	*add_token(t_token **tokens,  char *value, int type)
 {
     t_token	*new_token;
     t_token	*temp;

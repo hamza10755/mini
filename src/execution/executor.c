@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   executor.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
+/*   By: hbelaih <hbelaih@student.42.amman>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/17 22:13:20 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/15 00:48:32 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/15 14:56:11 by hbelaih          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,66 +14,110 @@
 
 extern int g_signal_flag;
 
-static char	**copy_and_update_env(char **env, int *shlvl_updated)
+static char	*increment_shlvl(const char *env_entry)
+{
+	int		shlvl;
+	char	*shlvl_str;
+	char	*new_value;
+	char	*itoa_res;
+
+	shlvl_str = (char *)(env_entry + 6);
+	shlvl = ft_atoi(shlvl_str);
+	if (shlvl < 0)
+		shlvl = 0;
+	itoa_res = ft_itoa(shlvl + 1);
+	if (!itoa_res)
+		return (NULL);
+	new_value = ft_strjoin("SHLVL=", itoa_res);
+	free(itoa_res);
+	return (new_value);
+}
+
+static void	free_env_array(char **env, int last)
+{
+	while (--last >= 0)
+		free(env[last]);
+	free(env);
+}
+
+static int	count_env_vars1(char **env)
+{
+	int count = 0;
+	while (env[count])
+		count++;
+	return count;
+}
+
+static int	copy_env_entry(char **new_env, char **env, int i)
+{
+	new_env[i] = ft_strdup(env[i]);
+	if (!new_env[i])
+		return (0);
+	return (1);
+}
+
+static int	handle_shlvl_entry(char **new_env, char **env, int i, int *shlvl_updated)
+{
+	char *new_value = increment_shlvl(env[i]);
+	if (!new_value)
+		return (0);
+	new_env[i] = new_value;
+	*shlvl_updated = 1;
+	return (1);
+}
+
+static char	**copy_env_with_shlvl(char **env, int *shlvl_updated)
 {
 	char	**new_env;
 	int		i;
 	int		count;
-	char	*shlvl_str;
-	int		shlvl;
-	char	*new_value;
 
 	*shlvl_updated = 0;
-	count = 0;
-	while (env[count])
-		count++;
-
+	count = count_env_vars1(env);
 	new_env = malloc(sizeof(char *) * (count + 2));
 	if (!new_env)
 		return (NULL);
-
 	i = 0;
 	while (env[i])
 	{
 		if (ft_strncmp(env[i], "SHLVL=", 6) == 0 && !*shlvl_updated)
 		{
-			shlvl_str = env[i] + 6;
-			shlvl = ft_atoi(shlvl_str);
-			if (shlvl < 0)
-				shlvl = 0;
-			new_value = ft_strjoin("SHLVL=", ft_itoa(shlvl + 1));
-			if (!new_value)
+			if (!handle_shlvl_entry(new_env, env, i, shlvl_updated))
 			{
-				while (--i >= 0)
-					free(new_env[i]);
-				free(new_env);
+				free_env_array(new_env, i);
 				return (NULL);
 			}
-			new_env[i] = new_value;
-			*shlvl_updated = 1;
 		}
 		else
 		{
-			new_env[i] = ft_strdup(env[i]);
-			if (!new_env[i])
+			if (!copy_env_entry(new_env, env, i))
 			{
-				while (--i >= 0)
-					free(new_env[i]);
-				free(new_env);
+				free_env_array(new_env, i);
 				return (NULL);
 			}
 		}
 		i++;
 	}
+	return (new_env);
+}
 
+static char	**copy_and_update_env(char **env, int *shlvl_updated)
+{
+	char	**new_env;
+	int		i;
+
+	new_env = copy_env_with_shlvl(env, shlvl_updated);
+	if (!new_env)
+		return (NULL);
+	i = 0;
+	while (new_env[i])
+		i++;
 	if (!*shlvl_updated)
 	{
 		new_env[i] = ft_strdup("SHLVL=1");
 		if (!new_env[i])
 		{
-			while (--i >= 0)
-				free(new_env[i]);
-			free(new_env);
+			free_env_array(new_env, i);
 			return (NULL);
 		}
 		i++;

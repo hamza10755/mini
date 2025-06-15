@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
+/*   By: hbelaih <hbelaih@student.42.amman>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/21 23:30:00 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/15 01:05:58 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/15 15:48:21 by hbelaih          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,12 +22,11 @@ int main(void)
     t_env       *env;
     int         exit_status;
     int         saved_stdin;
-    
+    // char ** temp_env;
     exit_status = 0;
     env = init_env(environ);
     if (!env)
         return (1);
-    tokens = NULL;
     init_signals();
     saved_stdin = dup(0);
     while (1)
@@ -52,12 +51,11 @@ int main(void)
                 env = NULL;
                 exit(exit_status);
             }
-            tokens = tokenize(input, convert_env_to_array(env), &exit_status);
+            // temp_env = convert_env_to_array(env);
+            tokens = tokenize(input, &exit_status);
             if (g_signal_flag == SIGINT) {
-                if (tokens) {
+                if (tokens)
                     free_tokens(tokens);
-                    tokens = NULL;
-                }
                 if (input)
                 {
                     free(input);
@@ -73,7 +71,6 @@ int main(void)
                 execute_command(tokens, &env, &exit_status);
                 set_exit_status_env(exit_status, &env);
                 free_tokens(tokens);
-                tokens = NULL;
             }
             else
             {
@@ -93,5 +90,6 @@ int main(void)
         free_env(env);
         env = NULL;
     }
+    // free_array(temp_env);
     return (exit_status);
 }

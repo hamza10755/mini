@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   redirections.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hamzabillah <hamzabillah@student.42.fr>    +#+  +:+       +#+        */
+/*   By: hbelaih <hbelaih@student.42.amman>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/11 05:00:00 by hamzabillah       #+#    #+#             */
-/*   Updated: 2025/06/15 01:02:57 by hamzabillah      ###   ########.fr       */
+/*   Updated: 2025/06/15 15:51:31 by hbelaih          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,7 +102,8 @@ int setup_redirection(t_token *token, int *fd_in, int *fd_out) {
 	return 0;
 }
 
-int handle_redirections(t_token *tokens, int *fd_in, int *fd_out) {
+int handle_redirections(t_token *tokens, int *fd_in, int *fd_out)
+{
 	t_token *current;
 	int status;
 
